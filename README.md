@@ -1,16 +1,48 @@
-# React + Vite
+# ⚽ Sportmania Odds — Real-Time Betting Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Multi-source odds comparison engine for **1xBet Malaysia**, **12Play MY**, and **the-odds-api** (Unibet). Live at [sportmania-betting.netlify.app](https://sportmania-betting.netlify.app).
 
-Currently, two official plugins are available:
+## Pipeline (`pipeline/`)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Script | Purpose |
+|--------|---------|
+| `auto_scraper.py` | Deterministic auto-scraper (all 3 sources, cascading priority) |
+| `odds_pipeline.py` | Cron pipeline — merge, transform, deploy |
+| `1xbet_scraper.py` | 1xBet `GetGameZip` API via cloudscraper |
+| `scraper_12play.py` | 12Play via 12PSports.com (Selenium + undetected-chromedriver) |
+| `odds_api_fetcher.py` | the-odds-api (Unibet) fallback |
+| `transform_ah.py` | Malay odds → Decimal conversion |
+| `show_odds.py` | CLI odds viewer |
+| `check_1xbet_api.py` | API health check |
+| `deploy_dashboard.sh` | Build + Netlify Drop deploy |
 
-## React Compiler
+### Cron
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Runs every 4 hours via `odds-monitor-wc-qf` cron job. Output: `data.json` → Netlify Drop.
 
-## Expanding the Oxlint configuration
+## Frontend (`src/`)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+React + Vite + Tailwind. Mobile-first. Key components:
+
+- **Dashboard** — countdown, 1xBet vs 12Play columns, edge badges
+- **MatchDetail** — Asian Handicap / Over-Under breakdown, vig analysis
+- **BetLogForm** — bankroll tracker
+- **EdgeBadge** — implied probability + edge visualisation
+
+## Stack
+
+- Pipeline: Python 3.11, cloudscraper, Selenium, undetected-chromedriver
+- Frontend: React 18, Vite, Netlify Drop
+- Live: [[sportmania-betting.netlify.app]](https://sportmania-betting.netlify.app)
+
+## Quick Start
+
+```bash
+# Pipeline
+pip install cloudscraper requests the-odds-api
+python pipeline/auto_scraper.py --deploy --force
+
+# Frontend dev
+npm install
+npm run dev
+```
