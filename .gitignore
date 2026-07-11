@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+*.egg
+.venv/
+venv/
+
+# Node
+node_modules/
+dist-ssr/
+*.local
+npm-debug.log*
+
+# Deployment
+.netlify/
+deploy.zip
+deploy.tar.gz
+*.log
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Secrets
+*.env
+.env.*
+credentials.json
+*.key

@@ -1,0 +1,61 @@
+/* ─── Mobile-friendly tweaks ─── */
+.terminal-grid td,
+.terminal-grid th {
+  padding: 10px 8px;
+}
+@media (min-width: 640px) {
+  .terminal-grid td,
+  .terminal-grid th {
+    padding: 10px 14px;
+  }
+}
+
+/* Bigger touch targets on mobile */
+.mobile-touch {
+  min-height: 44px;
+}
+
+/* Quick-amount button grid */
+.quick-amount-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+/* FAB (floating action button) */
+.fab-bet {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 40;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 204, 255, 0.3);
+  transition: transform 0.2s;
+}
+.fab-bet:active {
+  transform: scale(0.92);
+}
+
+/* Scrollable tables with visible scroll hint */
+.scroll-hint {
+  position: relative;
+}
+.scroll-hint::after {
+  content: '→ swipe →';
+  position: absolute;
+  bottom: 2px;
+  right: 8px;
+  font-size: 0.45rem;
+  color: #555577;
+  pointer-events: none;
+}
+@media (min-width: 640px) {
+  .scroll-hint::after {
+    display: none;
+  }
+}

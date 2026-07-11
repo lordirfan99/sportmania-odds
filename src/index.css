@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dark-900: #0a0a0f;
+  --color-dark-800: #12121a;
+  --color-dark-700: #1a1a26;
+  --color-dark-600: #24243a;
+  --color-dark-500: #2a2a45;
+  --color-accent-green: #00ff88;
+  --color-accent-red: #ff3355;
+  --color-accent-yellow: #ffcc00;
+  --color-accent-cyan: #00ccff;
+  --color-accent-gray: #555577;
+  --color-muted: #8888aa;
+}
+
+body {
+  background-color: #0a0a0f;
+  color: #e0e0f0;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.edge-positive-pulse {
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(0, 255, 136, 0.4); }
+  50% { opacity: 0.85; box-shadow: 0 0 16px rgba(0, 255, 136, 0.8); }
+}
+
+.terminal-grid {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.terminal-grid th {
+  padding: 10px 14px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #8888aa;
+  border-bottom: 1px solid #24243a;
+  white-space: nowrap;
+}
+.terminal-grid td {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #1a1a26;
+  white-space: nowrap;
+}
+.terminal-grid tr:hover td {
+  background-color: #1a1a26;
+}
+
+.num-mono {
+  font-variant-numeric: tabular-nums;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.section-header {
+  color: #8888aa;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #24243a;
+  margin-bottom: 12px;
+}
+
+.card {
+  background: #12121a;
+  border: 1px solid #24243a;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.card:hover {
+  border-color: #2a2a45;
+}
