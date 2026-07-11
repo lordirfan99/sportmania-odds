@@ -35,8 +35,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DIST_DIR = BASE_DIR / "dist"
 PUBLIC_DIR = BASE_DIR / "public"
 DATA_FILE = PUBLIC_DIR / "data.json"
-USERNAME = "lordirfan"
-PASSWORD = "lordirfan"
+
+# Load .env file manually if it exists
+env_path = BASE_DIR / ".env"
+if env_path.exists():
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        if "=" in line and not line.strip().startswith("#"):
+            k, v = line.split("=", 1)
+            os.environ[k.strip()] = v.strip()
+
+USERNAME = os.environ.get("PLAY12_USERNAME", "lordirfan")
+PASSWORD = os.environ.get("PLAY12_PASSWORD", "lordirfan")
 
 # ─── Helpers ───
 
@@ -448,7 +457,7 @@ def deploy():
     
     # Use the multipart zip deploy (same as _deploy_final.py)
     dist_dir = BASE_DIR / "dist"
-    zip_path = "/tmp/sportmania-deploy.zip"
+    zip_path = str(BASE_DIR / "deploy.zip")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for root, dirs, files in os.walk(str(dist_dir)):
             for fname in files:
@@ -456,7 +465,7 @@ def deploy():
                 arcname = os.path.relpath(fpath, str(dist_dir)).replace("\\", "/")
                 zf.write(fpath, arcname)
 
-    deploy_token = "nfp_fGAN5ehwsHaD87oZmJ24AF2Gvi473ZnQ216c"
+    deploy_token = os.environ.get("NETLIFY_AUTH_TOKEN", "nfp_fGAN5ehwsHaD87oZmJ24AF2Gvi473ZnQ216c")
     site_id = "3d225a22-04e0-40fa-9629-0fb0f9cb8d40"
 
     with open(zip_path, "rb") as f:
@@ -480,6 +489,8 @@ def deploy():
 # ─── Main ───
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     headless = "--headless" in sys.argv
     print(f"{'='*60}")
     print(f"ODDS PIPELINE — {fmt_now()}  (headless={headless})")

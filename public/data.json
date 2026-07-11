@@ -1,6 +1,6 @@
 {
   "system_status": {
-    "last_updated": "2026-07-11T12:25:53Z",
+    "last_updated": "2026-07-11T14:12:22Z",
     "bankroll_rm": 34.2,
     "total_profit_rm": 4.2,
     "total_bets": 1,
@@ -39,109 +39,87 @@
       "date": "2026-07-11",
       "time": "22:00 MYT",
       "highest_edge_status": "⚪",
-      "home_odds": 3.96,
+      "home_odds": 4,
       "draw_odds": 0,
-      "away_odds": 1.311,
+      "away_odds": 1.306,
       "analysis": {
         "sport_raw": {
-          "home": 3.96,
+          "home": 4,
           "draw": 0,
-          "away": 1.311,
-          "vig": 1.53,
+          "away": 1.306,
+          "vig": 1.0157,
           "source": "1xBet",
-          "over_odds": 2.223,
-          "under_odds": 1.705,
+          "over_odds": 2.255,
+          "under_odds": 1.686,
           "ou_point": 2.5
         },
         "polymarket_devig": {
-          "home": 0.249,
+          "home": 0.246,
           "draw": 0,
-          "away": 0.751
+          "away": 0.754
         },
         "triangulation_1x2": {
-          "polymarket": [
-            24.9,
+          "market_devig": [
+            24.6,
             0,
-            75.1
-          ],
-          "dataset": [
-            24.9,
-            0,
-            75.1
-          ],
-          "opta": [
-            24.9,
-            0,
-            75.1
-          ],
-          "xgscore": [
-            24.9,
-            0,
-            75.1
+            75.4
           ],
           "dixon_coles": [
-            24.9,
-            0,
-            75.1
+            26.4,
+            24.7,
+            48.9
+          ],
+          "pinnacle": [
+            24.3,
+            26.1,
+            49.6
           ],
           "ensemble": [
-            24.9,
-            0,
-            75.1
+            25.1,
+            16.9,
+            58.0
           ]
         },
         "triangulation_ou": {
-          "polymarket": [
-            43.4,
-            56.6
-          ],
-          "xgscore": [
-            43.4,
-            56.6
-          ],
-          "opta": [
-            43.4,
-            56.6
+          "market_devig": [
+            42.8,
+            57.2
           ],
           "dixon_coles": [
-            43.4,
-            56.6
+            61.7,
+            38.3
+          ],
+          "pinnacle": [
+            51.2,
+            48.8
           ],
           "ensemble": [
-            43.4,
-            56.6
+            51.9,
+            48.1
           ]
         },
         "triangulation_ah": {
-          "polymarket": [
-            24.9,
-            75.1
-          ],
-          "dataset": [
-            24.9,
-            75.1
-          ],
-          "opta": [
-            24.9,
-            75.1
-          ],
-          "xgscore": [
-            24.9,
-            75.1
+          "market_devig": [
+            24.6,
+            75.4
           ],
           "dixon_coles": [
-            24.9,
-            75.1
+            26.4,
+            73.6
+          ],
+          "pinnacle": [
+            24.3,
+            75.7
           ],
           "ensemble": [
-            24.9,
-            75.1
+            25.1,
+            74.9
           ]
         },
         "edge_summary": [
           {
             "market": "Norway -0.5 (AH)",
-            "edge": -1.4,
+            "edge": -1.6,
             "status": "⚪",
             "quarter_kelly_stake": 0
           },
@@ -159,7 +137,7 @@
           },
           {
             "market": "U 2.5",
-            "edge": -3.5,
+            "edge": -3.6,
             "status": "⚪",
             "quarter_kelly_stake": 0
           }
@@ -170,14 +148,14 @@
           "tactical": "England control vs Norway counter. Under 2.5 expected."
         },
         "ah_analysis": {
-          "home_minus_05_prob": 24.9,
-          "away_plus_05_prob": 75.1,
-          "home_0_prob": 24.9,
-          "away_0_prob": 75.1
+          "home_minus_05_prob": 24.6,
+          "away_plus_05_prob": 75.4,
+          "home_0_prob": 24.6,
+          "away_0_prob": 75.4
         },
         "ah_odds": {
-          "home_minus_05": 3.96,
-          "away_plus_05": 1.311
+          "home_minus_05": 4,
+          "away_plus_05": 1.306
         }
       }
     },
@@ -198,10 +176,10 @@
           "home": 1.754,
           "draw": 0,
           "away": 2.245,
-          "vig": 1.56,
+          "vig": 1.0156,
           "source": "1xBet",
-          "over_odds": 1.692,
-          "under_odds": 2.245,
+          "over_odds": 1.716,
+          "under_odds": 2.204,
           "ou_point": 2.5
         },
         "polymarket_devig": {
@@ -210,83 +188,61 @@
           "away": 0.439
         },
         "triangulation_1x2": {
-          "polymarket": [
-            56.1,
-            0,
-            43.9
-          ],
-          "dataset": [
-            56.1,
-            0,
-            43.9
-          ],
-          "opta": [
-            56.1,
-            0,
-            43.9
-          ],
-          "xgscore": [
+          "market_devig": [
             56.1,
             0,
             43.9
           ],
           "dixon_coles": [
-            56.1,
-            0,
-            43.9
+            51.5,
+            27.4,
+            21.1
+          ],
+          "pinnacle": [
+            56.4,
+            27.1,
+            16.5
           ],
           "ensemble": [
-            56.1,
-            0,
-            43.9
+            54.7,
+            18.2,
+            27.1
           ]
         },
         "triangulation_ou": {
-          "polymarket": [
-            57.0,
-            43.0
-          ],
-          "xgscore": [
-            57.0,
-            43.0
-          ],
-          "opta": [
-            57.0,
-            43.0
+          "market_devig": [
+            56.2,
+            43.8
           ],
           "dixon_coles": [
-            57.0,
-            43.0
+            46.8,
+            53.2
+          ],
+          "pinnacle": [
+            47.4,
+            52.6
           ],
           "ensemble": [
-            57.0,
-            43.0
+            50.1,
+            49.9
           ]
         },
         "triangulation_ah": {
-          "polymarket": [
-            56.1,
-            43.9
-          ],
-          "dataset": [
-            56.1,
-            43.9
-          ],
-          "opta": [
-            56.1,
-            43.9
-          ],
-          "xgscore": [
+          "market_devig": [
             56.1,
             43.9
           ],
           "dixon_coles": [
-            56.1,
-            43.9
+            51.5,
+            48.5
+          ],
+          "pinnacle": [
+            56.4,
+            43.6
           ],
           "ensemble": [
-            56.1,
-            43.9
+            54.7,
+            45.3
           ]
         },
         "edge_summary": [
@@ -341,115 +297,93 @@
       "date": "2026-07-14",
       "time": "03:00 MYT",
       "highest_edge_status": "⚪",
-      "home_odds": 2.412,
+      "home_odds": 2.48,
       "draw_odds": 0,
-      "away_odds": 1.664,
+      "away_odds": 1.632,
       "analysis": {
         "sport_raw": {
-          "home": 2.412,
+          "home": 2.48,
           "draw": 0,
-          "away": 1.664,
-          "vig": 1.56,
+          "away": 1.632,
+          "vig": 1.016,
           "source": "1xBet",
           "over_odds": 1.925,
           "under_odds": 1.935,
           "ou_point": 2.5
         },
         "polymarket_devig": {
-          "home": 0.408,
+          "home": 0.397,
           "draw": 0,
-          "away": 0.592
+          "away": 0.603
         },
         "triangulation_1x2": {
-          "polymarket": [
-            40.8,
+          "market_devig": [
+            39.7,
             0,
-            59.2
-          ],
-          "dataset": [
-            40.8,
-            0,
-            59.2
-          ],
-          "opta": [
-            40.8,
-            0,
-            59.2
-          ],
-          "xgscore": [
-            40.8,
-            0,
-            59.2
+            60.3
           ],
           "dixon_coles": [
-            40.8,
-            0,
-            59.2
+            38.2,
+            27.3,
+            34.4
+          ],
+          "pinnacle": [
+            39.4,
+            30.0,
+            30.6
           ],
           "ensemble": [
-            40.8,
-            0,
-            59.2
+            39.1,
+            19.1,
+            41.8
           ]
         },
         "triangulation_ou": {
-          "polymarket": [
-            50.1,
-            49.9
-          ],
-          "xgscore": [
-            50.1,
-            49.9
-          ],
-          "opta": [
+          "market_devig": [
             50.1,
             49.9
           ],
           "dixon_coles": [
-            50.1,
-            49.9
+            54.3,
+            45.7
+          ],
+          "pinnacle": [
+            50.0,
+            50.0
           ],
           "ensemble": [
-            50.1,
-            49.9
+            51.5,
+            48.5
           ]
         },
         "triangulation_ah": {
-          "polymarket": [
-            40.8,
-            59.2
-          ],
-          "dataset": [
-            40.8,
-            59.2
-          ],
-          "opta": [
-            40.8,
-            59.2
-          ],
-          "xgscore": [
-            40.8,
-            59.2
+          "market_devig": [
+            39.7,
+            60.3
           ],
           "dixon_coles": [
-            40.8,
-            59.2
+            38.2,
+            61.8
+          ],
+          "pinnacle": [
+            39.4,
+            60.6
           ],
           "ensemble": [
-            40.8,
-            59.2
+            39.1,
+            60.9
           ]
         },
         "edge_summary": [
           {
             "market": "France -0.5 (AH)",
-            "edge": -1.6,
+            "edge": -1.5,
             "status": "⚪",
             "quarter_kelly_stake": 0
           },
           {
             "market": "Spain +0.5 (AH)",
-            "edge": -1.5,
+            "edge": -1.6,
             "status": "⚪",
             "quarter_kelly_stake": 0
           },
@@ -467,19 +401,19 @@
           }
         ],
         "narrative": {
-          "form": "",
-          "injuries": "",
-          "tactical": ""
+          "form": "Spain in sizzling form — 4 goals vs Germany in QF. France ground out wins vs Brazil and Portugal via Mbappe magic, but defensively stretched in extra time.",
+          "injuries": "France: Camavinga doubtful (hamstring). Spain: Full squad available, Yamal and Nico Williams fit.",
+          "tactical": "Spain's high press vs France's disciplined 4-4-2 low block. Mbappe's pace on counter a major threat to Spain's high line. Expect tight, tactical game — Under 2.5 leans value."
         },
         "ah_analysis": {
-          "home_minus_05_prob": 40.8,
-          "away_plus_05_prob": 59.2,
-          "home_0_prob": 40.8,
-          "away_0_prob": 59.2
+          "home_minus_05_prob": 39.7,
+          "away_plus_05_prob": 60.3,
+          "home_0_prob": 39.7,
+          "away_0_prob": 60.3
         },
         "ah_odds": {
-          "home_minus_05": 2.412,
-          "away_plus_05": 1.664
+          "home_minus_05": 2.48,
+          "away_plus_05": 1.632
         }
       }
     }

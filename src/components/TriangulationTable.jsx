@@ -1,19 +1,23 @@
 export default function TriangulationTable({ title, sources, headers, decimals = 1 }) {
   const colorMap = {
-    'polymarket': 'text-accent-cyan',
-    'dataset': 'text-blue-400',
-    'opta': 'text-purple-400',
-    'xgscore': 'text-accent-yellow',
-    'dixon_coles': 'text-orange-400',
-    'ensemble': 'text-white font-bold',
+    'market_devig': 'text-accent-cyan',
+    'dixon_coles':  'text-accent-yellow',
+    'pinnacle':     'text-purple-400',
+    'polymarket':   'text-green-400',
+    'dataset':      'text-blue-400',    // legacy fallback
+    'opta':         'text-purple-400',  // legacy fallback
+    'xgscore':      'text-accent-yellow', // legacy fallback
+    'ensemble':     'text-white font-bold',
   };
   const labelMap = {
-    'polymarket': 'Polymarket',
-    'dataset': 'Dataset 49K',
-    'opta': 'Opta Analyst',
-    'xgscore': 'xGscore',
-    'dixon_coles': 'Dixon-Coles',
-    'ensemble': 'ENSEMBLE',
+    'market_devig': '1xBet Devigged',
+    'dixon_coles':  'Dixon-Coles (Poisson)',
+    'pinnacle':     'Pinnacle (Sharp)',
+    'polymarket':   'Polymarket',
+    'dataset':      'Dataset 49K',
+    'opta':         'Opta Analyst',
+    'xgscore':      'xGscore',
+    'ensemble':     'ENSEMBLE',
   };
 
   return (

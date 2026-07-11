@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Activity,
@@ -15,7 +15,7 @@ import EdgeBadge from './EdgeBadge';
 import BetLogForm from './BetLogForm';
 import { evaluateMatch } from '../lib/simulator';
 import {
-  getAllBets, computeStats, settleBet,
+  computeStats, settleBet,
   getFullState, depositBankroll, withdrawBankroll,
 } from '../lib/betStore';
 
@@ -57,6 +57,69 @@ function DecisionBadge({ decision, confidence }) {
   );
 }
 
+/* ---------- confetti canvas ---------- */
+function ConfettiCanvas({ active }) {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    if (!active) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', resize);
+    resize();
+
+    const colors = ['#f43f5e', '#ec4899', '#d946ef', '#a855f7', '#8b5cf6', '#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b'];
+    const particles = Array.from({ length: 120 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 4 + 4,
+      d: Math.random() * canvas.height,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+      tiltAngle: 0
+    }));
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p) => {
+        p.tiltAngle += p.tiltAngleIncremental;
+        p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+        p.x += Math.sin(p.tiltAngle);
+        p.tilt = Math.sin(p.tiltAngle - (p.r / 2)) * 15;
+
+        if (p.y > canvas.height) {
+          p.x = Math.random() * canvas.width;
+          p.y = -20;
+          p.tilt = Math.random() * 10 - 5;
+        }
+
+        ctx.beginPath();
+        ctx.lineWidth = p.r;
+        ctx.strokeStyle = p.color;
+        ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+        ctx.stroke();
+      });
+      animationFrameId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [active]);
+
+  if (!active) return null;
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-50 w-full h-full" />;
+}
+
 /* ---------- main component ---------- */
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -75,6 +138,8 @@ export default function Dashboard() {
   const [bankrollAmount, setBankrollAmount] = useState('');
   const [bankrollNote, setBankrollNote] = useState('');
   const [bankrollAction, setBankrollAction] = useState('deposit');
+  const [partyMode, setPartyMode] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const navigate = useNavigate();
 
   // ── Load data.json + stored bets ──
@@ -146,7 +211,6 @@ export default function Dashboard() {
 
   // mergedBets + liveStatus already loaded from persistent store in useEffect
   const allBets = mergedBets;
-  const stats = liveStatus;
 
   // Filter upcoming matches
   const today = new Date();
@@ -175,10 +239,17 @@ export default function Dashboard() {
   // Divergence tracking
   const systemBets = [];
   const userBets = allBets;
-  Object.entries(matchEvals).forEach(([matchId, evalResult]) => {
+  matches.forEach((m) => {
+    const evalResult = matchEvals[m.id];
+    if (!evalResult) return;
     evalResult.decisions.forEach((d) => {
       if (d.decision === 'BET') {
-        systemBets.push({ matchId, ...d });
+        systemBets.push({ 
+          matchId: m.id, 
+          home_team: m.home_team,
+          away_team: m.away_team,
+          ...d 
+        });
       }
     });
   });
@@ -187,7 +258,9 @@ export default function Dashboard() {
   const divergedBets = systemBets.filter((sb) => {
     return !userBets.some(
       (ub) =>
-        ub.match_id === sb.matchId?.replace('_settled', '')?.slice(0, -6) &&
+        (ub.match_id === sb.matchId || 
+         ub.home_team === sb.home_team || 
+         (ub.home_team && sb.market.includes(ub.home_team))) && 
         ub.market === sb.market
     );
   });
@@ -209,7 +282,6 @@ export default function Dashboard() {
     }
     setSettleError('');
     const scoreStr = `${hScore}-${aScore}`;
-    const totalGoals = hScore + aScore;
     const profit = isWon
       ? parseFloat((bet.stake_rm * (bet.odds_decimal - 1)).toFixed(2))
       : -bet.stake_rm;
@@ -222,17 +294,35 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-20 sm:pb-6">
-      {/* ---- Header ---- */}
-      <div className="mb-4 sm:mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <BarChart3 className="w-5 h-5 text-accent-cyan shrink-0" />
-          <h1 className="text-base sm:text-lg font-bold tracking-wider text-white">BETTING ENGINE v2.0</h1>
+    <div className={`transition-all duration-500 ${partyMode ? 'party-theme min-h-screen' : ''}`}>
+      <ConfettiCanvas active={partyMode} />
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-20 sm:pb-6">
+        {/* ---- Header ---- */}
+        <div className="mb-4 sm:mb-6 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <BarChart3 className={`w-5 h-5 shrink-0 ${partyMode ? 'text-accent-green animate-spin' : 'text-accent-cyan'}`} />
+              <h1 className={`text-base sm:text-lg font-bold tracking-wider ${partyMode ? 'party-title' : 'text-white'}`}>BETTING ENGINE v2.0</h1>
+            </div>
+            <div className="text-[0.55rem] sm:text-[0.6rem] text-muted tracking-[0.2em] uppercase">
+              6-Layer Ensemble · World Cup 2026 · Cron every 1h
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setShowHelp(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.6rem] font-bold tracking-wider bg-dark-700 text-muted hover:text-white border border-dark-500 hover:border-accent-cyan/30 transition-all mobile-touch cursor-pointer"
+            >
+              ❓ GUIDE
+            </button>
+            <button
+              onClick={() => setPartyMode(!partyMode)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.6rem] font-black tracking-wider transition-all duration-300 mobile-touch cursor-pointer ${partyMode ? 'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.6)] border-transparent scale-105 animate-pulse' : 'bg-dark-700 text-muted hover:text-white border border-dark-500 hover:border-accent-cyan/30'}`}
+            >
+              {partyMode ? '🥳 PARTY ON' : '🎈 PARTY OFF'}
+            </button>
+          </div>
         </div>
-        <div className="text-[0.55rem] sm:text-[0.6rem] text-muted tracking-[0.2em] uppercase">
-          6-Layer Ensemble · World Cup 2026 · Cron every 4h
-        </div>
-      </div>
 
       {/* ---- Status Bar ---- */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-3 mb-6 sm:mb-8">
@@ -287,10 +377,28 @@ export default function Dashboard() {
           <h2 className="section-header mb-0">System Says — Shadow Simulation</h2>
         </div>
 
+        <div className="card bg-dark-800/40 border border-dark-600/50 p-4 mb-4 flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-accent-cyan font-bold uppercase tracking-wider text-[0.65rem]">
+            🔍 How to read this dashboard:
+          </div>
+          <div className="text-muted leading-relaxed text-[0.62rem] space-y-1.5">
+            <p>
+              This engine uses the <strong className="text-white/80">BMAD-METHOD</strong> to cross-reference betting odds from 1xBet, 12Play, and the-odds-api against 6 analytics models (Triangulation).
+            </p>
+            <p>
+              Every market is filtered through 3 verification gates: 
+              <span className="text-white"> G1 (Edge ≥ 3.2%)</span>, 
+              <span className="text-white"> G2 (Model consensus deviation ≤ 10%)</span>, and 
+              <span className="text-white"> G3 (Positive historical ROI)</span>. 
+              If any gate fails, the recommendation is <strong className="text-accent-red">SKIP</strong>. Click the <span className="text-accent-cyan font-bold cursor-pointer" onClick={() => setShowHelp(true)}>❓ GUIDE</span> button in the header for a detailed breakdown.
+            </p>
+          </div>
+        </div>
+
         <div className="grid gap-3">
           {matches.map((m) => {
             const ev = matchEvals[m.id];
-            if (!ev || ev.summary.bet === 0) return null;
+            if (!ev) return null;
             return (
               <div key={m.id} className="card">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -314,9 +422,9 @@ export default function Dashboard() {
                       <tr>
                         <th className="text-left">Market</th>
                         <th className="text-right num-mono">Edge %</th>
-                        <th className="text-center num-mono">G1</th>
-                        <th className="text-center num-mono">G2</th>
-                        <th className="text-center num-mono">G3</th>
+                        <th className="text-center num-mono">G1 (Edge)</th>
+                        <th className="text-center num-mono">G2 (Consensus)</th>
+                        <th className="text-center num-mono">G3 (History)</th>
                         <th className="text-center">Decision</th>
                         <th className="text-right num-mono">Kelly</th>
                       </tr>
@@ -328,18 +436,33 @@ export default function Dashboard() {
                         const g3 = d.gates.gate3;
                         return (
                           <tr key={i}>
-                            <td className="text-left text-xs text-white/80">{d.market}</td>
+                            <td className="text-left text-xs text-white/80">
+                              <div>{d.market}</div>
+                              {d.reason && (
+                                <div className="text-[0.55rem] text-muted/65 mt-0.5 max-w-[200px] truncate" title={d.reason}>
+                                  {d.reason}
+                                </div>
+                              )}
+                            </td>
                             <td className={`text-right num-mono text-xs ${d.edge > 20 ? 'text-accent-green font-bold' : d.edge >= 5 ? 'text-green-400' : d.edge >= -5 ? 'text-muted' : 'text-accent-red'}`}>
                               {d.edge > 0 ? '+' : ''}{d.edge.toFixed(1)}%
                             </td>
-                            <td className={`text-center text-xs ${g1 === true ? 'text-accent-green' : g1 === false ? 'text-accent-red' : 'text-muted'}`}>
-                              {g1 === true ? '✅' : g1 === false ? '❌' : '·'}
+                            <td className={`text-center text-[0.6rem] font-medium ${g1 === true ? 'text-accent-green' : g1 === false ? 'text-accent-red' : 'text-muted'}`}>
+                              {g1 === true ? '✅ PASS' : g1 === false ? '❌ FAIL' : '·'}
                             </td>
-                            <td className={`text-center text-xs ${g2 === true ? 'text-accent-green' : g2 === false ? 'text-accent-red' : 'text-muted'}`}>
-                              {g2 === true ? '✅' : g2 === false ? '❌' : '·'}
+                            <td className={`text-center text-[0.6rem] font-medium ${g2 === true ? 'text-accent-green' : g2 === false ? 'text-accent-red' : 'text-muted'}`}>
+                              {g2 === true ? (
+                                <span>✅ {d.consensus ? `σ=${d.consensus.stdDevPct.toFixed(1)}%` : 'PASS'}</span>
+                              ) : g2 === false ? (
+                                <span>❌ {d.consensus ? `σ=${d.consensus.stdDevPct.toFixed(1)}%` : 'FAIL'}</span>
+                              ) : '·'}
                             </td>
-                            <td className={`text-center text-xs ${g3 === true ? 'text-accent-green' : g3 === false ? 'text-accent-red' : 'text-muted'}`}>
-                              {g3 === true ? '✅' : g3 === false ? '❌' : '·'}
+                            <td className={`text-center text-[0.6rem] font-medium ${g3 === true ? 'text-accent-green' : g3 === false ? 'text-accent-red' : 'text-muted'}`}>
+                              {g3 === true ? (
+                                <span>✅ {d.historical ? `ROI=${d.historical.roi >= 0 ? '+' : ''}${d.historical.roi.toFixed(0)}%` : 'PASS'}</span>
+                              ) : g3 === false ? (
+                                <span>❌ {d.historical ? `ROI=${d.historical.roi.toFixed(0)}%` : 'FAIL'}</span>
+                              ) : '· (N/A)'}
                             </td>
                             <td className="text-center">
                               <DecisionBadge decision={d.decision} confidence={d.confidence} />
@@ -828,6 +951,83 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* ---- Guide Modal ---- */}
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md px-3 py-4"
+          onClick={() => setShowHelp(false)}>
+          <div className="w-full max-w-2xl bg-dark-800 border border-dark-500 rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-dark-600 sticky top-0 bg-dark-800 z-10">
+              <div className="flex items-center gap-2">
+                <BrainCircuit className="w-5 h-5 text-accent-cyan" />
+                <h3 className="text-sm font-bold text-white tracking-wider uppercase">BMAD Betting System Guide</h3>
+              </div>
+              <button onClick={() => setShowHelp(false)} className="text-muted hover:text-white transition-colors p-1">
+                ✕
+              </button>
+            </div>
+            
+            {/* Content */}
+            <div className="p-5 space-y-6 text-xs text-white/80 leading-relaxed">
+              <div>
+                <h4 className="text-white font-bold mb-2 uppercase tracking-wide text-xs">🧠 1. The 3-Gate Verification System</h4>
+                <p className="text-muted mb-3">To minimize risk, every potential bet must clear three independent verification gates before receiving a <strong className="text-accent-green">BET</strong> recommendation:</p>
+                <div className="space-y-3 pl-2">
+                  <div className="border-l-2 border-accent-cyan pl-3">
+                    <span className="text-accent-cyan font-bold block uppercase tracking-wider text-[0.6rem]">Gate 1: Edge Threshold (G1)</span>
+                    We compare our ensemble model's fair probability against the bookmaker's implied odds. A bet must have at least a <strong className="text-white">3.2% edge</strong> to pass.
+                  </div>
+                  <div className="border-l-2 border-accent-yellow pl-3">
+                    <span className="text-accent-yellow font-bold block uppercase tracking-wider text-[0.6rem]">Gate 2: Consensus Agreement (G2)</span>
+                    Measures the deviation (disagreement) between our independent models (Opta, Dixon-Coles, xGscore, etc.). If standard deviation is <strong className="text-white">≤ 10%</strong>, the models agree and the gate passes.
+                  </div>
+                  <div className="border-l-2 border-accent-green pl-3">
+                    <span className="text-accent-green font-bold block uppercase tracking-wider text-[0.6rem]">Gate 3: Historical ROI (G3)</span>
+                    A dynamic self-correcting feedback loop. It checks similar wagers in your betting history. If those past bets have a negative net ROI, Gate 3 fails to prevent repeating losing patterns.
+                  </div>
+                </div>
+              </div>
+
+              <hr className="border-dark-600" />
+
+              <div>
+                <h4 className="text-white font-bold mb-2 uppercase tracking-wide text-xs">⚖️ 2. Triangulation Models</h4>
+                <p className="text-muted mb-2">Rather than relying on one predictor, our engine synthesizes probabilities from 6 sources:</p>
+                <ul className="list-disc pl-4 space-y-1 text-muted">
+                  <li><strong className="text-white/90">Polymarket</strong>: Real-time consensus from global prediction markets.</li>
+                  <li><strong className="text-white/90">Dataset 49K</strong>: Historical outcomes from a 49,000-match historical database.</li>
+                  <li><strong className="text-white/90">Opta Analyst</strong>: Professional sports analytics and team statistics.</li>
+                  <li><strong className="text-white/90">xGscore</strong>: Mathematical expected goals models.</li>
+                  <li><strong className="text-white/90">Dixon-Coles</strong>: Bivariate Poisson process distribution models.</li>
+                  <li><strong className="text-white/90">ENSEMBLE</strong>: The weighted mathematical average of all active models.</li>
+                </ul>
+              </div>
+
+              <hr className="border-dark-600" />
+
+              <div>
+                <h4 className="text-white font-bold mb-2 uppercase tracking-wide text-xs">📈 3. Staking & Kelly Criterion</h4>
+                <p className="text-muted mb-2">We apply the **Kelly Criterion** to calculate optimal bet sizing based on your edge size:</p>
+                <div className="bg-dark-900 rounded p-3 font-mono text-center text-accent-cyan text-xs">
+                  Fraction = (Edge / 100) / (Bookmaker Odds - 1) * 0.25 (Quarter-Kelly)
+                </div>
+                <p className="text-muted mt-2">
+                  Using a <strong>Quarter-Kelly factor</strong> reduces volatility and safeguards your bankroll against variance. The final stake amount is capped at your **Max stake %** slider setting.
+                </p>
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-5 py-3.5 bg-dark-900/50 border-t border-dark-600 text-center">
+              <button onClick={() => setShowHelp(false)} className="px-4 py-2 bg-accent-cyan/10 hover:bg-accent-cyan/20 border border-accent-cyan/30 rounded text-accent-cyan font-bold text-[0.65rem] tracking-wider uppercase transition-all">
+                Understood
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── FAB — Floating Action Button (mobile only) ── */}
       <button
         onClick={() => { setBetFormMatch(null); setShowBetForm(true); }}
@@ -839,8 +1039,9 @@ export default function Dashboard() {
 
       {/* ---- Footer ---- */}
       <div className="mt-8 text-[0.45rem] sm:text-[0.55rem] text-muted text-center">
-        Data refreshes every 4 hours &middot; Last sync: {fmtLocal(lastUpdated)} <span className="opacity-50">({fmtLocalDate(lastUpdated)})</span>
+        Data refreshes every hour &middot; Last sync: {fmtLocal(lastUpdated)} <span className="opacity-50">({fmtLocalDate(lastUpdated)})</span>
       </div>
     </div>
+  </div>
   );
 }

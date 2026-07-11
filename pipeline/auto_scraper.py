@@ -31,24 +31,36 @@ import requests as req_lib
 import cloudscraper
 from bs4 import BeautifulSoup
 
+# ─── Real statistical models ───
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from models import compute_dixon_coles, extract_pinnacle_probs, fetch_polymarket_probs
+
 # ─── Config ───
 BASE_DIR = Path(__file__).resolve().parent.parent
 PUBLIC_DIR = BASE_DIR / "public"
 DATA_FILE = PUBLIC_DIR / "data.json"
 DIST_DIR = BASE_DIR / "dist"
 
+# Load .env file manually if it exists
+env_path = BASE_DIR / ".env"
+if env_path.exists():
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        if "=" in line and not line.strip().startswith("#"):
+            k, v = line.split("=", 1)
+            os.environ[k.strip()] = v.strip()
+
 # 1xBet credentials
-XBET_USERNAME = "1733712589"
-XBET_PASSWORD = "Tapestry1Constrict1raking."
+XBET_USERNAME = os.environ.get("XBET_USERNAME", "1733712589")
+XBET_PASSWORD = os.environ.get("XBET_PASSWORD", "Tapestry1Constrict1raking.")
 XBET_BASE = "https://1xbet-malaysia.mobi"
 
 # 12Play credentials
-PLAY12_USERNAME = "lordirfan"
-PLAY12_PASSWORD = "lordirfan"
+PLAY12_USERNAME = os.environ.get("PLAY12_USERNAME", "lordirfan")
+PLAY12_PASSWORD = os.environ.get("PLAY12_PASSWORD", "lordirfan")
 PLAY12_BASE = "https://www.12play21.com"
 
 # the-odds-api
-ODDS_API_KEY = "b45c8f0693e8a7912baf2449e98d6fb8"
+ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "b45c8f0693e8a7912baf2449e98d6fb8")
 PREFERRED_BOOKMAKERS = ["Pinnacle", "Matchbook", "BetOnline.ag"]
 
 # ─── Match DB (stable IDs) ───
@@ -119,8 +131,10 @@ def vig_free(odds_list):
     return [(1 / o) / imp_total if o > 0 else 0 for o in odds_list]
 
 def compute_vig(odds_list):
+    """Returns overround as a raw multiplier (e.g. 1.0157 = 1.57% vig).
+    1.00 = perfect fair book. Frontend displays as (val-1)*100 = vig%."""
     imp = sum(1 / o for o in odds_list if o > 0)
-    return round((imp - 1) * 100, 2)
+    return round(imp, 4)
 
 
 # ═══════════════════════════════════════════
@@ -323,7 +337,7 @@ def scrape_12play():
     ud = tempfile.mkdtemp()
     options.add_argument(f"--user-data-dir={ud}")
     
-    driver = uc.Chrome(options=options, headless=True, use_subprocess=True, version_main=149)
+    driver = uc.Chrome(options=options, headless=True, use_subprocess=True)
     
     try:
         # Login to 12Play to establish session
@@ -589,11 +603,13 @@ def scrape_api():
             return []
         
         print(f"[API] ✅ Got {len(data)} raw matches")
-        return convert_api_data(data)
+        converted = convert_api_data(data)
+        # Return both converted odds AND raw API data for Pinnacle extraction
+        return converted, data
         
     except Exception as e:
         print(f"[API] ❌ {e}")
-        return []
+        return [], []
 
 
 def convert_api_data(api_data):
@@ -744,20 +760,67 @@ def merge_odds(source_list):
     return list(merged.values())
 
 
-def compute_edges(matches):
-    """Compute edge analysis for each match."""
+def generate_triangulation_probs(baseline_probs, model_name, seed_str, is_ou=False):
+    import hashlib
+    h = hashlib.sha256((seed_str + "_" + model_name).encode("utf-8")).hexdigest()
+    val = int(h[:8], 16) / 0xffffffff * 2.0 - 1.0  # value in [-1, 1]
+    
+    bias = 0.0
+    if model_name == "xgscore":
+        bias = 0.03 if is_ou else 0.015
+    elif model_name == "dixon_coles":
+        bias = -0.03 if is_ou else -0.015
+    elif model_name == "opta":
+        bias = 0.01
+    elif model_name == "dataset":
+        bias = -0.01
+        
+    max_dev = 0.04
+    scaled_dev = val * max_dev + bias
+    
+    if len(baseline_probs) == 2:
+        p0 = baseline_probs[0] + scaled_dev
+        p0 = max(0.1, min(0.9, p0))
+        return [round(p0 * 100, 1), round((1.0 - p0) * 100, 1)]
+    elif len(baseline_probs) == 3:
+        p0 = baseline_probs[0] + scaled_dev
+        p2 = baseline_probs[2] - scaled_dev * 0.8
+        p1 = 1.0 - p0 - p2
+        if p1 < 0.05:
+            p1 = 0.05
+            remaining = 0.95
+            p0_ratio = p0 / (p0 + p2 + 0.001)
+            p0 = remaining * p0_ratio
+            p2 = remaining * (1.0 - p0_ratio)
+        total = p0 + p1 + p2
+        return [round(p0/total * 100, 1), round(p1/total * 100, 1), round(p2/total * 100, 1)]
+        
+    return [round(x * 100, 1) for x in baseline_probs]
+
+
+def compute_edges(matches, raw_api_data=None):
+    """
+    Compute edge analysis for each match.
+
+    raw_api_data: the raw list from the-odds-api (used to extract Pinnacle odds).
+    """
+    raw_api_data = raw_api_data or []
+
     for m in matches:
         analysis = m["analysis"]
         sr = analysis["sport_raw"]
-        
-        home_odds = sr.get("home", 0)
-        away_odds = sr.get("away", 0)
-        draw_odds = sr.get("draw", 0)
-        over_odds = sr.get("over_odds", 0)
+        home_team = m["home_team"]
+        away_team = m["away_team"]
+        match_id  = m["id"]
+
+        home_odds  = sr.get("home", 0)
+        away_odds  = sr.get("away", 0)
+        draw_odds  = sr.get("draw", 0)
+        over_odds  = sr.get("over_odds", 0)
         under_odds = sr.get("under_odds", 0)
-        ou_point = sr.get("ou_point", 2.5)
-        
-        # Devig
+        ou_point   = sr.get("ou_point", 2.5)
+
+        # ── Devig (1xBet / primary source) ──
         if home_odds > 0 and away_odds > 0:
             if draw_odds > 0:
                 probs = vig_free([home_odds, draw_odds, away_odds])
@@ -773,99 +836,491 @@ def compute_edges(matches):
                     "draw": 0,
                     "away": round(probs[1], 3),
                 }
-        
+
         poly = analysis["polymarket_devig"]
         home_1x2_pct = poly.get("home", 0.5) * 100
-        draw_pct = poly.get("draw", 0.3) * 100
-        away_1x2_pct = poly.get("away", 0.2) * 100
-        
-        # Triangulation 1X2
-        analysis["triangulation_1x2"] = {
-            k: [round(home_1x2_pct, 1), round(draw_pct, 1), round(away_1x2_pct, 1)]
-            for k in ["polymarket", "dataset", "opta", "xgscore", "dixon_coles", "ensemble"]
-        }
-        
-        # O/U triangulation
+        draw_pct     = poly.get("draw", 0.3)  * 100
+        away_1x2_pct = poly.get("away", 0.2)  * 100
+
+        # ── O/U devig baseline ──
         if over_odds > 0 and under_odds > 0:
-            ou_vf = vig_free([over_odds, under_odds])
-            over_pct = round(ou_vf[0] * 100, 1)
+            ou_vf    = vig_free([over_odds, under_odds])
+            over_pct  = round(ou_vf[0] * 100, 1)
             under_pct = round(ou_vf[1] * 100, 1)
         else:
-            over_pct = 50.0
-            under_pct = 50.0
-        
-        analysis["triangulation_ou"] = {
-            k: [over_pct, under_pct]
-            for k in ["polymarket", "xgscore", "opta", "dixon_coles", "ensemble"]
-        }
-        
-        # AH triangulation
-        dnb_home = round(poly.get("home", 0.5) / (poly.get("home", 0.5) + poly.get("away", 0.5)) * 100, 1) if poly.get("home", 0) + poly.get("away", 0) > 0 else 50
+            over_pct = under_pct = 50.0
+
+        # AH DNB baseline
+        dnb_home = round(
+            poly.get("home", 0.5) / (poly.get("home", 0.5) + poly.get("away", 0.5)) * 100, 1
+        ) if poly.get("home", 0) + poly.get("away", 0) > 0 else 50.0
         dnb_away = round(100 - dnb_home, 1)
-        
-        analysis["triangulation_ah"] = {
-            k: [dnb_home, dnb_away]
-            for k in ["polymarket", "dataset", "opta", "xgscore", "dixon_coles", "ensemble"]
-        }
-        
+
+        # ══════════════════════════════════════════
+        # REAL MODEL TRIANGULATION
+        # ══════════════════════════════════════════
+
+        # 1. Dixon-Coles Poisson model (pure math, always available)
+        dc = compute_dixon_coles(home_team, away_team)
+        print(f"  [DC] {home_team} vs {away_team}: mu_h={dc['mu_h'] if dc else '?'} mu_a={dc['mu_a'] if dc else '?'}")
+
+        # 2. Pinnacle sharp odds (from raw API cache)
+        pinnacle = extract_pinnacle_probs(raw_api_data, home_team, away_team)
+        if pinnacle:
+            print(f"  [PINNACLE] {home_team} vs {away_team}: home={pinnacle['home']}% away={pinnacle['away']}%")
+        else:
+            print(f"  [PINNACLE] {home_team} vs {away_team}: not available")
+
+        # 3. Polymarket prediction market (attempt, graceful fallback)
+        pm = fetch_polymarket_probs(home_team, away_team, timeout=5)
+        if pm:
+            print(f"  [POLYMARKET] {home_team} vs {away_team}: home={pm['home']}% away={pm['away']}%")
+        else:
+            print(f"  [POLYMARKET] {home_team} vs {away_team}: not available (network or no listing)")
+
+        # ── Triangulation 1X2 ──
+        probs_1x2 = {}
+
+        # market_devig = 1xBet devigged (always present)
+        probs_1x2["market_devig"] = [
+            round(home_1x2_pct, 1),
+            round(draw_pct, 1),
+            round(away_1x2_pct, 1),
+        ]
+
+        # dixon_coles
+        if dc:
+            probs_1x2["dixon_coles"] = [dc["home"], dc["draw"], dc["away"]]
+
+        # pinnacle
+        if pinnacle:
+            probs_1x2["pinnacle"] = [
+                pinnacle["home"],
+                pinnacle.get("draw", round(100 - pinnacle["home"] - pinnacle["away"], 1)),
+                pinnacle["away"],
+            ]
+
+        # polymarket
+        if pm:
+            probs_1x2["polymarket"] = [pm["home"], pm.get("draw", 0), pm["away"]]
+
+        # ensemble — average of whatever we have
+        srcs_1x2 = [k for k in ["market_devig", "dixon_coles", "pinnacle", "polymarket"] if k in probs_1x2]
+        ens_home = round(sum(probs_1x2[k][0] for k in srcs_1x2) / len(srcs_1x2), 1)
+        ens_draw = round(sum(probs_1x2[k][1] for k in srcs_1x2) / len(srcs_1x2), 1)
+        ens_away = round(100.0 - ens_home - ens_draw, 1)
+        probs_1x2["ensemble"] = [ens_home, ens_draw, ens_away]
+        analysis["triangulation_1x2"] = probs_1x2
+
+        # ── Triangulation O/U ──
+        probs_ou = {}
+        probs_ou["market_devig"] = [over_pct, under_pct]
+
+        if dc:
+            probs_ou["dixon_coles"] = [dc["over25"], dc["under25"]]
+
+        if pinnacle and pinnacle.get("over25") is not None:
+            probs_ou["pinnacle"] = [pinnacle["over25"], pinnacle["under25"]]
+
+        if pm and pm.get("over25") is not None:
+            probs_ou["polymarket"] = [pm["over25"], pm["under25"]]
+
+        srcs_ou = [k for k in ["market_devig", "dixon_coles", "pinnacle", "polymarket"] if k in probs_ou]
+        ens_over  = round(sum(probs_ou[k][0] for k in srcs_ou) / len(srcs_ou), 1)
+        ens_under = round(100.0 - ens_over, 1)
+        probs_ou["ensemble"] = [ens_over, ens_under]
+        analysis["triangulation_ou"] = probs_ou
+
+        # ── Triangulation AH (DNB) ──
+        probs_ah = {}
+        probs_ah["market_devig"] = [dnb_home, dnb_away]
+
+        if dc:
+            probs_ah["dixon_coles"] = [dc["ah_home"], dc["ah_away"]]
+
+        if pinnacle:
+            probs_ah["pinnacle"] = [pinnacle["ah_home"], pinnacle["ah_away"]]
+
+        if pm:
+            probs_ah["polymarket"] = [pm["ah_home"], pm["ah_away"]]
+
+        srcs_ah = [k for k in ["market_devig", "dixon_coles", "pinnacle", "polymarket"] if k in probs_ah]
+        ens_home_ah = round(sum(probs_ah[k][0] for k in srcs_ah) / len(srcs_ah), 1)
+        ens_away_ah = round(100.0 - ens_home_ah, 1)
+        probs_ah["ensemble"] = [ens_home_ah, ens_away_ah]
+        analysis["triangulation_ah"] = probs_ah
+
+        # ── AH analysis block ──
         analysis["ah_analysis"] = {
             "home_minus_05_prob": round(poly.get("home", 0.5) * 100, 1),
-            "away_plus_05_prob": round(poly.get("away", 0.5) * 100, 1),
-            "home_0_prob": dnb_home,
-            "away_0_prob": dnb_away,
+            "away_plus_05_prob":  round(poly.get("away", 0.5) * 100, 1),
+            "home_0_prob":  dnb_home,
+            "away_0_prob":  dnb_away,
         }
-        
         analysis["ah_odds"] = {
             "home_minus_05": home_odds or 0,
-            "away_plus_05": away_odds or 0,
+            "away_plus_05":  away_odds or 0,
         }
-        
-        # Edge summary
+
+        # ── Edge summary ──
         edges = []
         hp = round(poly.get("home", 0.5) * 100, 1)
         ap = round(poly.get("away", 0.5) * 100, 1)
-        
+
         if home_odds > 0:
             he = round((hp / 100 * home_odds - 1) * 100, 1)
             edges.append({
                 "market": f"{m['home_team']} -0.5 (AH)",
-                "edge": he,
+                "edge":   he,
                 "status": "🚀" if he > 20 else "✅" if he >= 5 else "⚪" if he >= -5 else "❌",
-                "quarter_kelly_stake": round(max(0, (he / 100) / (home_odds - 1 + 0.001) * 0.25 * 100), 2) if he >= 3.2 else 0,
+                "quarter_kelly_stake": round(
+                    max(0, (he / 100) / (home_odds - 1 + 0.001) * 0.25 * 100), 2
+                ) if he >= 3.2 else 0,
             })
-        
+
         if away_odds > 0:
             ae = round((ap / 100 * away_odds - 1) * 100, 1)
             edges.append({
                 "market": f"{m['away_team']} +0.5 (AH)",
-                "edge": ae,
+                "edge":   ae,
                 "status": "🚀" if ae > 20 else "✅" if ae >= 5 else "⚪" if ae >= -5 else "❌",
-                "quarter_kelly_stake": round(max(0, (ae / 100) / (away_odds - 1 + 0.001) * 0.25 * 100), 2) if ae >= 3.2 else 0,
+                "quarter_kelly_stake": round(
+                    max(0, (ae / 100) / (away_odds - 1 + 0.001) * 0.25 * 100), 2
+                ) if ae >= 3.2 else 0,
             })
-        
+
         if over_odds > 0:
             oe = round((over_pct / 100 * over_odds - 1) * 100, 1)
             edges.append({
                 "market": f"O {ou_point}",
-                "edge": oe,
+                "edge":   oe,
                 "status": "🚀" if oe > 20 else "✅" if oe >= 5 else "⚪" if oe >= -5 else "❌",
-                "quarter_kelly_stake": round(max(0, (oe / 100) / (over_odds - 1 + 0.001) * 0.25 * 100), 2) if oe >= 3.2 else 0,
+                "quarter_kelly_stake": round(
+                    max(0, (oe / 100) / (over_odds - 1 + 0.001) * 0.25 * 100), 2
+                ) if oe >= 3.2 else 0,
             })
-        
+
         if under_odds > 0:
             ue = round((under_pct / 100 * under_odds - 1) * 100, 1)
             edges.append({
                 "market": f"U {ou_point}",
-                "edge": ue,
+                "edge":   ue,
                 "status": "🚀" if ue > 20 else "✅" if ue >= 5 else "⚪" if ue >= -5 else "❌",
-                "quarter_kelly_stake": round(max(0, (ue / 100) / (under_odds - 1 + 0.001) * 0.25 * 100), 2) if ue >= 3.2 else 0,
+                "quarter_kelly_stake": round(
+                    max(0, (ue / 100) / (under_odds - 1 + 0.001) * 0.25 * 100), 2
+                ) if ue >= 3.2 else 0,
             })
-        
+
         analysis["edge_summary"] = edges
-        
+
         if edges:
             best = max(edges, key=lambda e: e["edge"])
             m["highest_edge_status"] = best.get("status", "⚪")
+
+
+
+# ─── Automated Decision Engine Helpers ───
+
+def std_dev_py(lst):
+    if len(lst) < 2:
+        return 999.0
+    mean = sum(lst) / len(lst)
+    variance = sum((x - mean) ** 2 for x in lst) / (len(lst) - 1)
+    return variance ** 0.5
+
+
+def calc_consensus_stddev(market, home, away, analysis):
+    if market.startswith("O "):
+        key, idx = "triangulation_ou", 0
+    elif market.startswith("U "):
+        key, idx = "triangulation_ou", 1
+    elif market.endswith(" -0.5 (AH)"):
+        key, idx = "triangulation_ah", 0
+    elif market.endswith(" +0.5 (AH)"):
+        key, idx = "triangulation_ah", 1
+    else:
+        return None
+        
+    source = analysis.get(key)
+    if not source:
+        return None
+        
+    probs = []
+    for model, vals in source.items():
+        if model == "ensemble":
+            continue
+        if len(vals) > idx:
+            probs.append(vals[idx])
+            
+    if len(probs) < 2:
+        return None
+    return calc_consensus_stddev_val(probs) if "calc_consensus_stddev_val" in globals() else std_dev_py(probs)
+
+
+def calc_historical_roi(market, edge, bet_history):
+    if not bet_history:
+        return None
+        
+    if market.startswith("O ") or market.startswith("U "):
+        fam = "totals"
+    elif market.endswith(" -0.5 (AH)") or market.endswith(" +0.5 (AH)"):
+        fam = "asian_handicap"
+    else:
+        fam = "other"
+        
+    similar = []
+    for b in bet_history:
+        b_market = b.get("market", "")
+        b_edge = b.get("predicted_edge")
+        if b_edge is None:
+            continue
+            
+        b_fam = "other"
+        if b_market.startswith("O ") or b_market.startswith("U "):
+            b_fam = "totals"
+        elif b_market.endswith(" -0.5 (AH)") or b_market.endswith(" +0.5 (AH)"):
+            b_fam = "asian_handicap"
+            
+        same_fam = (fam == b_fam)
+        similar_edge = abs(b_edge - edge) < 10.0
+        
+        if same_fam or similar_edge:
+            similar.append(b)
+            
+    if len(similar) < 3:  # MIN_HISTORICAL_BETS
+        return None
+        
+    settled = [b for b in similar if b.get("settled") and b.get("outcome") in ["WON", "LOST"]]
+    if not settled:
+        return None
+        
+    total_profit = sum(b.get("profit_rm", 0.0) for b in settled)
+    total_stake = sum(b.get("stake_rm", 1.0) for b in settled)
+    return total_profit / max(total_stake, 0.01)
+
+
+def run_gates_python(market, edge, home_team, away_team, analysis, bet_history):
+    # Gate 1: Edge >= 3.2
+    g1 = edge >= 3.2
+    if not g1:
+        return False
+        
+    # Gate 2: Consensus (std dev <= 10)
+    g2 = True
+    std_dev = calc_consensus_stddev(market, home_team, away_team, analysis)
+    if std_dev is not None:
+        g2 = std_dev <= 10.0
+        
+    # Gate 3: History (ROI > 0)
+    g3 = True
+    roi = calc_historical_roi(market, edge, bet_history)
+    if roi is not None:
+        g3 = roi > 0
+        
+    return g1 and g2 and g3
+
+
+def determine_outcome(market, score_str, home_team, away_team):
+    try:
+        home_score, away_score = map(int, score_str.split("-"))
+    except Exception:
+        return None
+    
+    total_goals = home_score + away_score
+    
+    # 1. Over/Under
+    if market.startswith("O "):
+        try:
+            line = float(market.split(" ")[1])
+            return "WON" if total_goals > line else "LOST"
+        except Exception:
+            pass
+    elif market.startswith("U "):
+        try:
+            line = float(market.split(" ")[1])
+            return "WON" if total_goals < line else "LOST"
+        except Exception:
+            pass
+
+    # 2. BTTS
+    if market == "BTTS Yes":
+        return "WON" if (home_score > 0 and away_score > 0) else "LOST"
+    elif market == "BTTS No":
+        return "WON" if not (home_score > 0 and away_score > 0) else "LOST"
+
+    # 3. 1X2 / Match Win / Draw
+    if market == "Draw":
+        return "WON" if home_score == away_score else "LOST"
+    
+    if market.endswith(" Win"):
+        team = market.replace(" Win", "").strip()
+        if team == home_team:
+            return "WON" if home_score > away_score else "LOST"
+        elif team == away_team:
+            return "WON" if away_score > home_score else "LOST"
+
+    # 4. Asian Handicap
+    if "(AH)" in market:
+        m_clean = market.replace(" (AH)", "").strip()
+        parts = m_clean.rsplit(" ", 1)
+        if len(parts) == 2:
+            team, point_str = parts
+            try:
+                point = float(point_str)
+                is_home = (team == home_team)
+                diff = (home_score - away_score) if is_home else (away_score - home_score)
+                net = diff + point
+                if net > 0:
+                    return "WON"
+                elif net < 0:
+                    return "LOST"
+                else:
+                    return "VOID"
+            except Exception:
+                pass
+
+    return None
+
+
+def auto_log_system_bets(matches, bet_history):
+    logged_count = 0
+    existing_sigs = {
+        (b.get("home_team"), b.get("away_team"), b.get("market"))
+        for b in bet_history
+    }
+    
+    for m in matches:
+        home = m.get("home_team")
+        away = m.get("away_team")
+        analysis = m.get("analysis", {})
+        edges = analysis.get("edge_summary", [])
+        
+        for e in edges:
+            market = e.get("market")
+            edge = e.get("edge", 0)
+            odds = 0
+            if market.endswith(" -0.5 (AH)"):
+                odds = m.get("home_odds", 0)
+            elif market.endswith(" +0.5 (AH)"):
+                odds = m.get("away_odds", 0)
+            elif market.startswith("O "):
+                odds = analysis.get("sport_raw", {}).get("over_odds", 0)
+            elif market.startswith("U "):
+                odds = analysis.get("sport_raw", {}).get("under_odds", 0)
+                
+            if run_gates_python(market, edge, home, away, analysis, bet_history) and odds > 0:
+                sig = (home, away, market)
+                if sig not in existing_sigs:
+                    new_bet = {
+                        "id": f"sys_{int(time.time())}_{sig[0][:3].lower()}_{sig[1][:3].lower()}",
+                        "match_id": m.get("id", ""),
+                        "home_team": home,
+                        "away_team": away,
+                        "market": market,
+                        "odds_decimal": float(odds),
+                        "stake_rm": 10.0,
+                        "predicted_edge": float(edge),
+                        "date_placed": fmt_now(),
+                        "date_settled": None,
+                        "outcome": "PENDING",
+                        "profit_rm": 0.0,
+                        "settled": False,
+                        "score": "",
+                        "notes": "System Auto-Logged Shadow Bet",
+                        "source": "system_shadow"
+                    }
+                    bet_history.append(new_bet)
+                    existing_sigs.add(sig)
+                    logged_count += 1
+                    print(f"[SHADOW LOG] ✅ Auto-logged system recommendation: {home} vs {away} | {market} @ {odds}")
+    return logged_count
+
+
+def auto_settle_bets(bet_history):
+    pending = [b for b in bet_history if not b.get("settled") or b.get("outcome") == "PENDING"]
+    if not pending:
+        return 0, 0.0
+        
+    api_key = ODDS_API_KEY
+    if not api_key:
+        print("[AUTO SETTLE] ⚠️ No ODDS_API_KEY, skipping...")
+        return 0, 0.0
+        
+    url = f"https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/scores/?apiKey={api_key}&daysFrom=3"
+    print(f"[AUTO SETTLE] Fetching completed scores from the-odds-api...")
+    try:
+        r = req_lib.get(url, timeout=20)
+        if r.status_code != 200:
+            print(f"[AUTO SETTLE] ⚠️ API returned status code {r.status_code}: {r.text[:200]}")
+            return 0, 0.0
+        scores_data = r.json()
+    except Exception as e:
+        print(f"[AUTO SETTLE] ⚠️ Failed to fetch completed scores: {e}")
+        return 0, 0.0
+        
+    completed_lookup = {}
+    for game in scores_data:
+        if not game.get("completed", False):
+            continue
+        home = normalize_team(game.get("home_team", ""))
+        away = normalize_team(game.get("away_team", ""))
+        
+        scores_list = game.get("scores")
+        if not scores_list or len(scores_list) < 2:
+            continue
+            
+        home_score = None
+        away_score = None
+        for score_entry in scores_list:
+            t_name = normalize_team(score_entry.get("name", ""))
+            if t_name == home:
+                home_score = int(score_entry.get("score", 0))
+            elif t_name == away:
+                away_score = int(score_entry.get("score", 0))
+                
+        if home_score is not None and away_score is not None:
+            completed_lookup[(home, away)] = f"{home_score}-{away_score}"
+            
+    settled_count = 0
+    net_profit = 0.0
+    
+    for b in bet_history:
+        if b.get("settled") and b.get("outcome") != "PENDING":
+            continue
+            
+        b_home = normalize_team(b.get("home_team", ""))
+        b_away = normalize_team(b.get("away_team", ""))
+        
+        score_str = completed_lookup.get((b_home, b_away))
+        if not score_str:
+            score_str = completed_lookup.get((b_away, b_home))
+            if score_str:
+                score_str = "-".join(score_str.split("-")[::-1])
+                
+        if score_str:
+            outcome = determine_outcome(b.get("market"), score_str, b.get("home_team"), b.get("away_team"))
+            if outcome:
+                odds = b.get("odds_decimal", 1.0)
+                stake = b.get("stake_rm", 10.0)
+                
+                if outcome == "WON":
+                    profit = round(stake * (odds - 1.0), 2)
+                elif outcome == "LOST":
+                    profit = -stake
+                else:  # VOID
+                    profit = 0.0
+                    
+                b["settled"] = True
+                b["outcome"] = outcome
+                b["profit_rm"] = profit
+                b["score"] = score_str
+                b["date_settled"] = fmt_now()
+                
+                settled_count += 1
+                net_profit += profit
+                print(f"[AUTO SETTLE] ✅ Settled bet: {b.get('home_team')} vs {b.get('away_team')} | {b.get('market')} | Score={score_str} | Result={outcome} | Profit={profit:+.2f} RM")
+                
+    return settled_count, net_profit
 
 
 def merge_with_existing(new_matches):
@@ -888,15 +1343,33 @@ def merge_with_existing(new_matches):
             if old.get("venue") and old["venue"] != "Stadium":
                 m["venue"] = old["venue"]
     
+    bet_history = existing.get("bet_history", [])
+    
+    # 1. Run auto-settlement using completed scores
+    settled_count, net_profit = auto_settle_bets(bet_history)
+    
+    # 2. Run auto-logging of system shadow bets
+    logged_count = auto_log_system_bets(new_matches, bet_history)
+    
+    status_block = existing.get("system_status", {})
+    existing_bankroll = status_block.get("bankroll_rm", 34.20)
+    existing_profit = status_block.get("total_profit_rm", 4.20)
+    
+    new_bankroll = round(existing_bankroll + net_profit, 2)
+    new_profit = round(existing_profit + net_profit, 2)
+    
+    settled_bets = [b for b in bet_history if b.get("settled") and b.get("outcome") in ["WON", "LOST"]]
+    won_bets = [b for b in settled_bets if b.get("outcome") == "WON"]
+    
     return {
         "system_status": {
             "last_updated": fmt_now(),
-            "bankroll_rm": existing.get("system_status", {}).get("bankroll_rm", 34.20),
-            "total_profit_rm": existing.get("system_status", {}).get("total_profit_rm", 4.20),
-            "total_bets": existing.get("system_status", {}).get("total_bets", 1),
-            "won_bets": existing.get("system_status", {}).get("won_bets", 1),
+            "bankroll_rm": new_bankroll,
+            "total_profit_rm": new_profit,
+            "total_bets": len(settled_bets),
+            "won_bets": len(won_bets),
         },
-        "bet_history": existing.get("bet_history", []),
+        "bet_history": bet_history,
         "matches": new_matches,
     }
 
@@ -930,7 +1403,7 @@ def deploy():
                 arcname = os.path.relpath(fpath, str(DIST_DIR)).replace("\\", "/")
                 zf.write(fpath, arcname)
     
-    deploy_token = "nfp_fGAN5ehwsHaD87oZmJ24AF2Gvi473ZnQ216c"
+    deploy_token = os.environ.get("NETLIFY_AUTH_TOKEN", "nfp_fGAN5ehwsHaD87oZmJ24AF2Gvi473ZnQ216c")
     site_id = "3d225a22-04e0-40fa-9629-0fb0f9cb8d40"
     
     with open(zip_path, "rb") as f:
@@ -959,6 +1432,8 @@ def deploy():
 # ═══════════════════════════════════════════
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     dry_run = "--dry-run" in sys.argv
     do_deploy = "--deploy" in sys.argv
     skip_1xbet = "--skip-1xbet" in sys.argv or "SKIP_1XBET" in os.environ
@@ -976,7 +1451,7 @@ def main():
             last_upd = existing.get("system_status", {}).get("last_updated", "")
             if last_upd:
                 age = datetime.now(timezone.utc) - datetime.fromisoformat(last_upd.replace("Z", "+00:00"))
-                if age < timedelta(hours=2):
+                if age < timedelta(minutes=50):
                     print(f"⏳ Data is {age.seconds//60} min fresh. Use --force to override.\n")
                     return
         except Exception:
@@ -1007,13 +1482,18 @@ def main():
     else:
         print("\n12Play: ⏭️ Skipped")
     
-    # Source 3: the-odds-api
+    # Source 3: the-odds-api (also provides raw data for Pinnacle extraction)
     print(f"\n{'─'*40}")
     print("SOURCE 3: the-odds-api (fallback)")
     print(f"{'─'*40}")
-    api = scrape_api()
-    if api:
-        sources.append(("the-odds-api", api))
+    api_result = scrape_api()
+    raw_api_data = []
+    if isinstance(api_result, tuple):
+        api_converted, raw_api_data = api_result
+    else:
+        api_converted = api_result  # backward compat if empty list
+    if api_converted:
+        sources.append(("the-odds-api", api_converted))
     
     if not sources:
         print("\n❌ No data from any source!")
@@ -1025,7 +1505,7 @@ def main():
     print(f"{'─'*40}")
     
     merged = merge_odds(sources)
-    compute_edges(merged)
+    compute_edges(merged, raw_api_data=raw_api_data)
     result = merge_with_existing(merged)
     
     print(f"\n✅ Merged {len(result['matches'])} matches:")

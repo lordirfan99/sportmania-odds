@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Plus, Send } from 'lucide-react';
+import { X, Send } from 'lucide-react';
 import { addBet } from '../lib/betStore';
 
 export default function BetLogForm({ match, onClose, onLogged }) {
@@ -25,6 +25,7 @@ export default function BetLogForm({ match, onClose, onLogged }) {
 
     setSaving(true);
     const bet = addBet({
+      match_id: match?.id || '',
       home_team: form.home_team,
       away_team: form.away_team,
       market: form.market,

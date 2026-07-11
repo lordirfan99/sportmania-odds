@@ -76,3 +76,40 @@ body {
 .card:hover {
   border-color: #2a2a45;
 }
+
+/* Party Mode Styles */
+.party-theme {
+  background-color: #0c0214 !important;
+  transition: background-color 0.5s ease;
+}
+
+.party-theme .card {
+  background: linear-gradient(135deg, #180929 0%, #0d051a 100%) !important;
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+  transition: all 0.3s ease;
+}
+.party-theme .card:hover {
+  border-color: #d946ef !important;
+  box-shadow: 0 0 25px rgba(217, 70, 239, 0.3);
+  transform: translateY(-2px);
+}
+
+.party-glow-text {
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+}
+
+.party-title {
+  background: linear-gradient(to right, #00ff88, #00ccff, #d946ef, #ffcc00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: party-gradient 6s linear infinite;
+  background-size: 200% auto;
+  text-shadow: 0 0 30px rgba(217, 70, 239, 0.2);
+}
+
+@keyframes party-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

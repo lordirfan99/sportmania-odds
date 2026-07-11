@@ -86,17 +86,15 @@ def edge_status(edge):
         return "❌"
 
 
-def kelly_pct(edge, prob_pct):
-    """Compute quarter-Kelly stake as % of bankroll.
+def kelly_pct(edge, book_odds):
+    """Compute quarter-Kelly stake as % of bankroll using bookmaker odds.
     
     Kelly % = (edge / (odds-1)) * 0.25  [quarter Kelly]
     0 if edge < 3.2% or edge < 0
     """
-    if edge < 3.2:
+    if edge < 3.2 or book_odds <= 1:
         return 0.0
-    p = prob_pct / 100.0
-    fair_odds = 1.0 / p
-    kelly_full = edge / 100.0 / (fair_odds - 1)  # full Kelly
+    kelly_full = (edge / 100.0) / (book_odds - 1)  # full Kelly
     quarter = max(0, kelly_full * 0.25 * 100)
     return round(quarter, 2)
 
@@ -206,25 +204,25 @@ def transform_match(match):
             "market": f"{home_team} -0.5 (AH)",
             "edge": home_ah_edge,
             "status": edge_status(home_ah_edge),
-            "quarter_kelly_stake": kelly_pct(home_ah_edge, ah["home_minus_05_prob"]),
+            "quarter_kelly_stake": kelly_pct(home_ah_edge, ah_home_odds),
         },
         {
             "market": f"{away_team} +0.5 (AH)",
             "edge": away_ah_edge,
             "status": edge_status(away_ah_edge),
-            "quarter_kelly_stake": kelly_pct(away_ah_edge, 100 - ah["home_minus_05_prob"]),
+            "quarter_kelly_stake": kelly_pct(away_ah_edge, ah_away_odds),
         },
         {
             "market": "O 2.5",
             "edge": over_edge,
             "status": edge_status(over_edge),
-            "quarter_kelly_stake": kelly_pct(over_edge, over_fair),
+            "quarter_kelly_stake": kelly_pct(over_edge, over_odds),
         },
         {
             "market": "U 2.5",
             "edge": under_edge,
             "status": edge_status(under_edge),
-            "quarter_kelly_stake": kelly_pct(under_edge, under_fair),
+            "quarter_kelly_stake": kelly_pct(under_edge, under_odds),
         },
     ]
     

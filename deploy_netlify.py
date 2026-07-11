@@ -1,6 +1,18 @@
 """Deploy to Netlify — manifest + file upload + lock."""
 import hashlib, os, sys, requests, time
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+# Load .env file manually if it exists
+dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+if os.path.exists(dotenv_path):
+    with open(dotenv_path, "r", encoding="utf-8") as f:
+        for line in f.read().splitlines():
+            if "=" in line and not line.strip().startswith("#"):
+                k, v = line.split("=", 1)
+                os.environ[k.strip()] = v.strip()
+
 TOKEN = os.environ.get("NETLIFY_AUTH_TOKEN", "nfp_fGAN5ehwsHaD87oZmJ24AF2Gvi473ZnQ216c")
 SITE_ID = "3d225a22-04e0-40fa-9629-0fb0f9cb8d40"
 DIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")
@@ -9,16 +21,16 @@ ha = {"Authorization": f"Bearer {TOKEN}"}
 
 # Read all files
 print("=== Reading files ===")
-file_map = {}  # path -> (content, sha256)
+file_map = {}  # path -> (content, sha1)
 for root, dirs, fnames in os.walk(DIST_DIR):
     for fname in fnames:
         fpath = os.path.join(root, fname)
         relpath = os.path.relpath(fpath, DIST_DIR).replace("\\", "/")
         with open(fpath, "rb") as f:
             content = f.read()
-        sha256 = hashlib.sha256(content).hexdigest()
-        file_map[relpath] = (content, sha256)
-        print(f"  {relpath}: {sha256[:16]}... ({len(content)} bytes)")
+        sha1 = hashlib.sha1(content).hexdigest()
+        file_map[relpath] = (content, sha1)
+        print(f"  {relpath}: {sha1[:16]}... ({len(content)} bytes)")
 
 # Create deploy
 files_manifest = {k: v[1] for k, v in file_map.items()}
@@ -43,7 +55,7 @@ if not deploy_id or d.get("error_message"):
 # Upload required files
 required = d.get("required", [])
 if required:
-    # Build reverse map: sha256 -> path
+    # Build reverse map: sha1 -> path
     sha_to_path = {v[1]: k for k, v in file_map.items()}
     
     # Check all SHAs are known
@@ -60,29 +72,17 @@ if required:
             continue
         content = file_map[relpath][0]
         put_resp = requests.put(
-            f"https://api.netlify.com/api/v1/deploys/{deploy_id}/files/{sha}",
+            f"https://api.netlify.com/api/v1/deploys/{deploy_id}/files/{relpath}",
             headers={**ha, "Content-Type": "application/octet-stream"},
             data=content,
             timeout=30
         )
         if put_resp.status_code == 200:
             uploaded += 1
-            print(f"  ✅ {relpath} (by SHA)")
+            print(f"  ✅ {relpath}")
         else:
-            # Try uploading by path
-            put_resp2 = requests.put(
-                f"https://api.netlify.com/api/v1/deploys/{deploy_id}/files/{relpath}",
-                headers={**ha, "Content-Type": "application/octet-stream"},
-                data=content,
-                timeout=30
-            )
-            if put_resp2.status_code == 200:
-                uploaded += 1
-                print(f"  ✅ {relpath} (by path)")
-            else:
-                print(f"  ❌ {relpath}: SHA={put_resp.status_code} Path={put_resp2.status_code}")
-                print(f"     SHA err: {put_resp.text[:100]}")
-                print(f"     Path err: {put_resp2.text[:100]}")
+            print(f"  ❌ {relpath}: status={put_resp.status_code}")
+            print(f"     err: {put_resp.text[:100]}")
     print(f"\nUploaded {uploaded}/{len(required)}")
 else:
     print("\n=== No files need uploading (cached) ===")

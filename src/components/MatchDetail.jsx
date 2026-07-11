@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import EdgeBadge from './EdgeBadge';
 import TriangulationTable from './TriangulationTable';
+import { evaluateMarket } from '../lib/simulator';
 
 /* ---------- helpers ---------- */
 function edgeClass(edge) {
@@ -17,12 +18,7 @@ function edgeClass(edge) {
   return 'text-accent-red';
 }
 
-function edgeStatusLabel(edge) {
-  if (edge > 20) return { badge: '🚀', label: 'KELLY' };
-  if (edge >= 5) return { badge: '✅', label: 'VALUE' };
-  if (edge >= -5) return { badge: '⚪', label: 'PASS' };
-  return { badge: '❌', label: 'AVOID' };
-}
+
 
 function fmtLocal(isoString) {
   return new Date(isoString).toLocaleTimeString('en-MY', {
@@ -133,10 +129,11 @@ export default function MatchDetail() {
               {match.home_odds && match.away_odds
                 ? ((1/match.home_odds + 1/match.away_odds) * 100).toFixed(2)
                 : '-'}%</span>
-            · Vig: <span className="text-accent-yellow">
+            · Bookmaker vig: <span className="text-accent-yellow">
               {match.home_odds && match.away_odds
                 ? ((1/match.home_odds + 1/match.away_odds - 1) * 100).toFixed(2)
                 : '-'}%</span>
+            <span className="ml-1 opacity-50">(bookie edge; 0% = fair odds)</span>
           </div>
         </div>
 
@@ -196,7 +193,7 @@ export default function MatchDetail() {
                     polymarketPct = twelvesportPct * (1 + edgePct / 100);
                   }
 
-                  const twelvesportDecimal = twelvesportPct !== null ? (100 / twelvesportPct) : null;
+                  const twelvesportDecimal = (twelvesportPct !== null && twelvesportPct !== 0) ? (100 / twelvesportPct) : null;
 
                   let cls, callLabel, callBadge;
                   if (edgePct > 20) {
@@ -218,7 +215,7 @@ export default function MatchDetail() {
                       <td className="text-left text-xs text-white/80">{e.market}</td>
                       <td className="text-right num-mono text-white/70">
                         {twelvesportPct !== null
-                          ? <>{twelvesportPct.toFixed(1)}%<br /><span className="text-[0.5rem] text-muted">{twelvesportDecimal.toFixed(2)}</span></>
+                          ? <>{twelvesportPct.toFixed(1)}%<br /><span className="text-[0.5rem] text-muted">{twelvesportDecimal ? twelvesportDecimal.toFixed(2) : '-'}</span></>
                           : '-'}
                       </td>
                       <td className="text-right num-mono text-accent-cyan">
@@ -261,35 +258,47 @@ export default function MatchDetail() {
               </thead>
               <tbody>
                 {analysis.edge_summary.map((e, i) => {
-                  // Re-run gates inline
-                  const edge = e.edge;
-                  const g1 = edge >= 3.2;
-                  const hasTri = analysis.triangulation_1x2 || analysis.triangulation_ou || analysis.triangulation_btts;
-                  const g2 = null; // simplified for detail view
-                  const g3 = null;
+                  // Run full 3-gate evaluation via simulator
+                  const eval_ = evaluateMarket(e, home_team, away_team, analysis, data.bet_history || []);
+                  const { gates, consensus, historical, decision, reason } = eval_;
+                  const g1 = gates.gate1;
+                  const g2 = gates.gate2;
+                  const g3 = gates.gate3;
 
                   let dBadge, dColor;
-                  if (!g1) {
-                    dBadge = 'SKIP'; dColor = 'bg-accent-red/15 text-accent-red border-accent-red/30';
-                  } else {
+                  if (decision === 'BET') {
                     dBadge = 'BET'; dColor = 'edge-positive-pulse bg-accent-green/20 text-accent-green border-accent-green/40';
+                  } else {
+                    dBadge = 'SKIP'; dColor = 'bg-accent-red/15 text-accent-red border-accent-red/30';
                   }
+
+                  const gateCell = (val, tooltip) => (
+                    <td title={tooltip || ''} className={`text-center text-xs cursor-help ${
+                      val === true ? 'text-accent-green' : val === false ? 'text-accent-red' : 'text-muted'
+                    }`}>
+                      {val === true ? '✅' : val === false ? '❌' : <span className="opacity-40">·</span>}
+                    </td>
+                  );
+
+                  const g2Tip = consensus
+                    ? `Model σ = ${consensus.stdDevPct.toFixed(1)}pp across ${consensus.models} models (limit: 10pp)`
+                    : 'No triangulation data for this market';
+                  const g3Tip = historical
+                    ? `Historical ROI: ${historical.roi.toFixed(1)}% from ${historical.total} similar bets`
+                    : 'Not enough historical bets yet (need ≥3 similar)';
 
                   return (
                     <tr key={i}>
                       <td className="text-left text-xs text-white/80">{e.market}</td>
-                      <td className={`text-right num-mono text-xs ${edge > 20 ? 'text-accent-green font-bold' : edge >= 5 ? 'text-green-400' : edge >= -5 ? 'text-muted' : 'text-accent-red'}`}>
-                        {edge > 0 ? '+' : ''}{edge.toFixed(1)}%
+                      <td className={`text-right num-mono text-xs ${e.edge > 20 ? 'text-accent-green font-bold' : e.edge >= 5 ? 'text-green-400' : e.edge >= -5 ? 'text-muted' : 'text-accent-red'}`}>
+                        {e.edge > 0 ? '+' : ''}{e.edge.toFixed(1)}%
                       </td>
-                      <td className={`text-center text-xs ${g1 ? 'text-accent-green' : 'text-accent-red'}`}>{g1 ? '✅' : '❌'}</td>
-                      <td className={`text-center text-xs ${g2 === true ? 'text-accent-green' : g2 === false ? 'text-accent-red' : 'text-muted'}`}>
-                        {g2 === true ? '✅' : g2 === false ? '❌' : '·'}
-                      </td>
-                      <td className={`text-center text-xs ${g3 === true ? 'text-accent-green' : g3 === false ? 'text-accent-red' : 'text-muted'}`}>
-                        {g3 === true ? '✅' : g3 === false ? '❌' : '·'}
-                      </td>
+                      {gateCell(g1, `Edge ${e.edge.toFixed(1)}% vs threshold 3.2%`)}
+                      {gateCell(g2, g2Tip)}
+                      {gateCell(g3, g3Tip)}
                       <td className="text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[0.5rem] font-bold border ${dColor}`}>
+                        <span className={`inline-block px-2 py-0.5 rounded text-[0.5rem] font-bold border ${dColor}`}
+                          title={reason || ''}>
                           {dBadge}
                         </span>
                       </td>
@@ -303,15 +312,14 @@ export default function MatchDetail() {
             </table>
           </div>
           <div className="mt-2 text-[0.55rem] text-muted text-center">
-            G1 = Edge &ge; 3.2% &nbsp;·&nbsp; G2 = Model std dev &lt; 10pp &nbsp;·&nbsp; G3 = Historical pattern ROI &gt; 0
-            &nbsp;·&nbsp; · = insufficient data
+            G1 = Edge ≥ 3.2% &nbsp;·&nbsp; G2 = Model σ &lt; 10pp (hover for value) &nbsp;·&nbsp; G3 = Historical ROI &gt; 0% &nbsp;·&nbsp; <span className="opacity-60">· = insufficient data</span>
           </div>
         </div>
       </div>
 
       {/* ---- 3-4. Triangulation Tables ---- */}
       <div className="mb-4 sm:mb-6">
-        <h2 className="section-header">3-4. Triangulation Tables — AH (DNB) &amp; O/U</h2>
+        <h2 className="section-header">3-4. Multi-Model Probability Triangulation</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           <TriangulationTable
             title="AH 0 (Draw No Bet)"
@@ -325,6 +333,13 @@ export default function MatchDetail() {
             headers={['Over 2.5', 'Under 2.5']}
             decimals={1}
           />
+        </div>
+        <div className="mt-2 text-[0.5rem] text-muted text-center px-2">
+          <span className="text-accent-cyan">1xBet Devigged</span> = zero-vig implied probs from primary bookie &nbsp;·&nbsp;
+          <span className="text-accent-yellow">Dixon-Coles</span> = Poisson goal model (real statistical model) &nbsp;·&nbsp;
+          <span className="text-purple-400">Pinnacle</span> = world's sharpest bookmaker devigged &nbsp;·&nbsp;
+          <span className="text-green-400">Polymarket</span> = prediction market (when available) &nbsp;·&nbsp;
+          <span className="text-white">ENSEMBLE</span> = average of all available sources
         </div>
       </div>
 
@@ -392,12 +407,10 @@ export default function MatchDetail() {
             </thead>
             <tbody>
               {analysis.edge_summary.map((e, i) => {
-                const stakeAmount =
-                  bankroll *
-                  (maxBankrollPct / 100) *
-                  (e.quarter_kelly_stake / 100);
-                const stakePct = e.quarter_kelly_stake;
-                const sl = edgeStatusLabel(e.edge);
+                const rawKelly = e.quarter_kelly_stake;
+                const cappedKelly = Math.min(rawKelly, maxBankrollPct);
+                const stakeAmount = bankroll * (cappedKelly / 100);
+                const stakePct = rawKelly;
                 return (
                   <tr key={i}>
                     <td className="text-left text-xs text-white/80">
