@@ -389,6 +389,66 @@ export default function MatchDetail() {
         </div>
       </div>
 
+      {/* ---- 5b. Key Probabilities ---- */}
+      {analysis.sport_raw?.home > 0 && (
+        <div className="mb-4 sm:mb-6">
+          <h2 className="section-header">
+            5b. Key Market Probabilities
+          </h2>
+          <div className="card">
+            {/* Asian Handicap -0.5 */}
+            <div className="mb-3">
+              <div className="text-[0.6rem] text-muted uppercase tracking-wider mb-1.5">
+                Asian Handicap -0.5
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div className="bg-dark-700/50 rounded p-2">
+                  <div className="text-[0.5rem] text-muted uppercase mb-0.5">{match.home_team} -0.5</div>
+                  <div className="text-sm font-bold text-white">{(1 / analysis.sport_raw.home * 100).toFixed(1)}%</div>
+                  <div className="text-[0.45rem] text-muted">
+                    @ {analysis.sport_raw.home.toFixed(3)} | Fair {(analysis.polymarket_devig?.home || 0) * 100 > 0 ? (analysis.polymarket_devig.home * 100).toFixed(1) : '-'}%
+                  </div>
+                </div>
+                <div className="bg-dark-700/50 rounded p-2">
+                  <div className="text-[0.5rem] text-muted uppercase mb-0.5">{match.away_team} +0.5</div>
+                  <div className="text-sm font-bold text-white">{(1 / analysis.sport_raw.away * 100).toFixed(1)}%</div>
+                  <div className="text-[0.45rem] text-muted">
+                    @ {analysis.sport_raw.away.toFixed(3)} | Fair {(analysis.polymarket_devig?.away || 0) * 100 > 0 ? (analysis.polymarket_devig.away * 100).toFixed(1) : '-'}%
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* O/U 2.5 */}
+            {analysis.sport_raw.over_odds > 0 && (
+              <div className="mb-3">
+                <div className="text-[0.6rem] text-muted uppercase tracking-wider mb-1.5">
+                  Over/Under {analysis.sport_raw.ou_point || 2.5} Goals
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-center">
+                  <div className="bg-dark-700/50 rounded p-2">
+                    <div className="text-[0.5rem] text-muted uppercase mb-0.5">Over {analysis.sport_raw.ou_point || 2.5}</div>
+                    <div className="text-sm font-bold text-white">{(1 / analysis.sport_raw.over_odds * 100).toFixed(1)}%</div>
+                    <div className="text-[0.45rem] text-muted">@ {analysis.sport_raw.over_odds.toFixed(2)}</div>
+                  </div>
+                  <div className="bg-dark-700/50 rounded p-2">
+                    <div className="text-[0.5rem] text-muted uppercase mb-0.5">Under {analysis.sport_raw.ou_point || 2.5}</div>
+                    <div className="text-sm font-bold text-white">{(1 / analysis.sport_raw.under_odds * 100).toFixed(1)}%</div>
+                    <div className="text-[0.45rem] text-muted">@ {analysis.sport_raw.under_odds.toFixed(2)}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-2 text-[0.5rem] text-muted text-center leading-relaxed">
+              <span className="text-white/90">% shown</span> = implied probability (1/odds) &nbsp;·&nbsp;
+              <span className="text-accent-cyan">Fair</span> = devigged probability &nbsp;·&nbsp;
+              Vig = sum of implied % − 100%
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ---- 6. Edge Summary & Staking ---- */}
       <div className="mb-4 sm:mb-6">
         <h2 className="section-header">
