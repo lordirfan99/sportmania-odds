@@ -1,6 +1,6 @@
 {
   "system_status": {
-    "last_updated": "2026-07-11T14:15:13Z",
+    "last_updated": "2026-07-12T16:15:56Z",
     "bankroll_rm": 34.2,
     "total_profit_rm": 4.2,
     "total_bets": 1,
@@ -31,264 +31,6 @@
   ],
   "matches": [
     {
-      "id": "eng_nor_03",
-      "home_team": "Norway",
-      "away_team": "England",
-      "venue": "Stadium",
-      "stage": "Quarterfinal",
-      "date": "2026-07-11",
-      "time": "22:00 MYT",
-      "highest_edge_status": "⚪",
-      "home_odds": 4,
-      "draw_odds": 0,
-      "away_odds": 1.306,
-      "analysis": {
-        "sport_raw": {
-          "home": 4,
-          "draw": 0,
-          "away": 1.306,
-          "vig": 1.0157,
-          "source": "1xBet",
-          "over_odds": 2.255,
-          "under_odds": 1.686,
-          "ou_point": 2.5
-        },
-        "polymarket_devig": {
-          "home": 0.246,
-          "draw": 0,
-          "away": 0.754
-        },
-        "triangulation_1x2": {
-          "market_devig": [
-            24.6,
-            0,
-            75.4
-          ],
-          "dixon_coles": [
-            26.4,
-            24.7,
-            48.9
-          ],
-          "pinnacle": [
-            24.3,
-            26.1,
-            49.6
-          ],
-          "ensemble": [
-            25.1,
-            16.9,
-            58.0
-          ]
-        },
-        "triangulation_ou": {
-          "market_devig": [
-            42.8,
-            57.2
-          ],
-          "dixon_coles": [
-            61.7,
-            38.3
-          ],
-          "pinnacle": [
-            51.2,
-            48.8
-          ],
-          "ensemble": [
-            51.9,
-            48.1
-          ]
-        },
-        "triangulation_ah": {
-          "market_devig": [
-            24.6,
-            75.4
-          ],
-          "dixon_coles": [
-            26.4,
-            73.6
-          ],
-          "pinnacle": [
-            24.3,
-            75.7
-          ],
-          "ensemble": [
-            25.1,
-            74.9
-          ]
-        },
-        "edge_summary": [
-          {
-            "market": "Norway -0.5 (AH)",
-            "edge": -1.6,
-            "status": "⚪",
-            "quarter_kelly_stake": 0
-          },
-          {
-            "market": "England +0.5 (AH)",
-            "edge": -1.5,
-            "status": "⚪",
-            "quarter_kelly_stake": 0
-          },
-          {
-            "market": "O 2.5",
-            "edge": -3.5,
-            "status": "⚪",
-            "quarter_kelly_stake": 0
-          },
-          {
-            "market": "U 2.5",
-            "edge": -3.6,
-            "status": "⚪",
-            "quarter_kelly_stake": 0
-          }
-        ],
-        "narrative": {
-          "form": "England: Unbeaten in 7 games this tournament (W5 D2). Conceded only 2 goals — best defensive record among remaining teams. Clean sheets against Tunisia (2-0), South Korea (1-0), Germany (0-0), and Netherlands (2-0). xGA per game: 0.58 — elite-level discipline. Attack relies on set pieces (4 goals from set plays) and Kane's linkup play. Bellingham has 3 goal involvements from midfield.\n\nNorway: Overperforming xG massively — scored 8 goals from 5.2 xG in last 4 games. Haaland with 5 goals (3.1 xG) shows clinical finishing. But Norway's defence leaked against top sides: 3 goals conceded vs Brazil group stage, 2 vs Portugal R16. xGA per game: 1.42 — suspect against elite attacks. Norway's path to SF was favourable (Hungary, Saudi Arabia, Brazil group; Croatia R16; Portugal QF on pens).",
-          "injuries": "England: FULL SQUAD — no reported injuries or suspensions. Southgate has luxury of unchanged XI. Rice, Bellingham, and Foden all fully fit.\n\nNorway: MIDFIELDER DOUBTFUL — Sander Berge (Burnley) struggling with a thigh strain picked up in QF vs Portugal. Ødegaard (Arsenal) fully fit and key to Norway's buildup. Haaland passed fit after dead leg vs Portugal. Defensive midfield cover thin if Berge ruled out — Berg (Bodø/Glimt) would step in, a significant downgrade in quality and experience.",
-          "tactical": "England (4-3-3 / 4-2-3-1): Southgate's side set up in a mid-block 4-3-3, defending narrow to force Norway wide. Full-backs instructed not to overlap simultaneously — one always stays to protect against Haaland's runs in behind. Rice drops between CBs in possession to create a 3-2-5 attacking shape. Key battle: Bellingham vs Ødegaard — two creative 10s dictating tempo.\n\nNorway (4-3-3 / 4-4-2 compact): Norway rely on quick transitions through Ødegaard's passing and Haaland's runs. They defend in a compact 4-4-2 mid-block, inviting pressure before springing counters. Norway's wide players (Sørloth, Nuusa) instructed to stay high and wide for diagonal switches.\n\nKey tactical factors: (1) England's set-piece threat vs Norway's zonal marking which has conceded 3 headed goals this tournament. (2) Norway's right-back Ryenerson vs Foden's drifting — mismatch when Ryerson steps up. (3) England's high line vs Haaland's pace in behind — Stones and Maguire must maintain discipline. (4) Under 2.5 heavily favoured: England games averaging 1.86 total goals this tournament, Norway's big games (vs Brazil, Portugal) finished 1-1 and 2-1 respectively."
-        },
-        "ah_analysis": {
-          "home_minus_05_prob": 24.6,
-          "away_plus_05_prob": 75.4,
-          "home_0_prob": 24.6,
-          "away_0_prob": 75.4
-        },
-        "ah_odds": {
-          "home_minus_05": 4,
-          "away_plus_05": 1.306
-        }
-      }
-    },
-    {
-      "id": "arg_sui_04",
-      "home_team": "Argentina",
-      "away_team": "Switzerland",
-      "venue": "Stadium",
-      "stage": "Quarterfinal",
-      "date": "2026-07-11",
-      "time": "03:00 MYT",
-      "highest_edge_status": "⚪",
-      "home_odds": 1.754,
-      "draw_odds": 0,
-      "away_odds": 2.245,
-      "analysis": {
-        "sport_raw": {
-          "home": 1.754,
-          "draw": 0,
-          "away": 2.245,
-          "vig": 1.0156,
-          "source": "1xBet",
-          "over_odds": 1.705,
-          "under_odds": 2.223,
-          "ou_point": 2.5
-        },
-        "polymarket_devig": {
-          "home": 0.561,
-          "draw": 0,
-          "away": 0.439
-        },
-        "triangulation_1x2": {
-          "market_devig": [
-            56.1,
-            0,
-            43.9
-          ],
-          "dixon_coles": [
-            51.5,
-            27.4,
-            21.1
-          ],
-          "pinnacle": [
-            56.4,
-            27.1,
-            16.5
-          ],
-          "ensemble": [
-            54.7,
-            18.2,
-            27.1
-          ]
-        },
-        "triangulation_ou": {
-          "market_devig": [
-            56.6,
-            43.4
-          ],
-          "dixon_coles": [
-            46.8,
-            53.2
-          ],
-          "pinnacle": [
-            47.4,
-            52.6
-          ],
-          "ensemble": [
-            50.3,
-            49.7
-          ]
-        },
-        "triangulation_ah": {
-          "market_devig": [
-            56.1,
-            43.9
-          ],
-          "dixon_coles": [
-            51.5,
-            48.5
-          ],
-          "pinnacle": [
-            56.4,
-            43.6
-          ],
-          "ensemble": [
-            54.7,
-            45.3
-          ]
-        },
-        "edge_summary": [
-          {
-            "market": "Argentina -0.5 (AH)",
-            "edge": -1.6,
-            "status": "⚪",
-            "quarter_kelly_stake": 0
-          },
-          {
-            "market": "Switzerland +0.5 (AH)",
-            "edge": -1.4,
-            "status": "⚪",
-            "quarter_kelly_stake": 0
-          },
-          {
-            "market": "O 2.5",
-            "edge": -3.5,
-            "status": "⚪",
-            "quarter_kelly_stake": 0
-          },
-          {
-            "market": "U 2.5",
-            "edge": -3.5,
-            "status": "⚪",
-            "quarter_kelly_stake": 0
-          }
-        ],
-        "narrative": {
-          "form": "Argentina: World Champions in imperious form — 6 straight wins this tournament. Scored 12 goals, conceded only 3. Messi (4 goals, 3 assists) in vintage form. Julian Alvarez (3 goals) pressing from the front. Enzo Fernandez and Mac Allister dominating midfield battles. Argentina's xG per game: 2.1 — highest among remaining teams. Defensively: Molina and Tagliafico providing width while CBs Romero and Otamendi form a formidable partnership. Only goal conceded from open play was vs Netherlands in group stage.\n\nSwitzerland: Ultra-disciplined tournament campaign — lost only to Spain (1-0) in group stage. Knocked out Italy (2-1 R16) and held Germany to 1-1. Shaqiri providing moments of magic. Embolo (3 goals) the focal point. xG per game: 0.94 — low but efficient. Switzerland's compact defensive block has frustrated every opponent except Spain. Their press resistance is excellent — rank 2nd in the tournament for successful passes under pressure (88%).",
-          "injuries": "Argentina: FULL STRENGTH — Scaloni has every first-team player available. Di Maria fully fit after minor knock sustained vs Ecuador QF. Lisandro Martinez available as defensive rotation option. No suspensions.\n\nSwitzerland: FULL STRENGTH — Murat Yakin has full squad selection. No reported injury concerns. Xhaka (Bayer Leverkusen) available after serving yellow card accumulation suspension in QF — massive boost for midfield solidity. Akanji (Manchester City) fully fit to marshal defence. Sommer in goal with no issues.",
-          "tactical": "Argentina (4-3-3 fluid): Argentina build in a 3-2-5, with Tagliafico pushing high on the left while Molina tucks into midfield alongside Enzo. Messi roams as a free 10, creating overloads in half-spaces. Mac Allister makes late runs into the box from left 8 position — key threat against compact defences. Alvarez drops to link play and stretches backlines with runs in behind. Defensively: aggressive counter-press triggered on loss, often winning ball back within 5 seconds high up the pitch.\n\nSwitzerland (5-3-2 / 3-4-2-1): Yakin's side sit in a deep 5-4-1 mid/low block, compacting the central 25 yards. Akanji steps out of the back three to engage Messi, leaving two covering. Wing-backs (Rodriguez, Widmer) stay narrow, forcing Argentina wide. Xhaka orchestrates counter-pressing triggers. Switzerland's offensive transition is direct — Embolo holds up while Shaqiri and Vargas break wide. Switzerland have scored 60% of their goals from set pieces or second balls.\n\nKey tactical factors: (1) Argentina's half-space overloads vs Switzerland's narrow 5-3-2 — the battle in the channels decides the game. (2) Switzerland's set-piece threat (6 goals from set plays) vs Argentina's zonal marking which conceded vs Netherlands from a corner. (3) Xhaka's return crucial for Switzerland's press resistance — without him vs Spain they had 67% passing accuracy under pressure. (4) Argentina's high edge (22.4% on Argentina Win) reflects genuine mismatch in quality — but Switzerland's discipline means it could be a tight 1-0 or 2-0 rather than a rout."
-        },
-        "ah_analysis": {
-          "home_minus_05_prob": 56.1,
-          "away_plus_05_prob": 43.9,
-          "home_0_prob": 56.1,
-          "away_0_prob": 43.9
-        },
-        "ah_odds": {
-          "home_minus_05": 1.754,
-          "away_plus_05": 2.245
-        }
-      }
-    },
-    {
       "id": "fra_spa_05",
       "home_team": "France",
       "away_team": "Spain",
@@ -297,30 +39,30 @@
       "date": "2026-07-14",
       "time": "03:00 MYT",
       "highest_edge_status": "⚪",
-      "home_odds": 2.48,
+      "home_odds": 2.385,
       "draw_odds": 0,
-      "away_odds": 1.632,
+      "away_odds": 1.677,
       "analysis": {
         "sport_raw": {
-          "home": 2.48,
+          "home": 2.385,
           "draw": 0,
-          "away": 1.632,
-          "vig": 1.016,
+          "away": 1.677,
+          "vig": 1.0156,
           "source": "1xBet",
-          "over_odds": 1.925,
-          "under_odds": 1.935,
+          "over_odds": 1.971,
+          "under_odds": 1.89,
           "ou_point": 2.5
         },
         "polymarket_devig": {
-          "home": 0.397,
+          "home": 0.413,
           "draw": 0,
-          "away": 0.603
+          "away": 0.587
         },
         "triangulation_1x2": {
           "market_devig": [
-            39.7,
+            41.3,
             0,
-            60.3
+            58.7
           ],
           "dixon_coles": [
             38.2,
@@ -328,20 +70,20 @@
             34.4
           ],
           "pinnacle": [
-            39.4,
-            30.0,
-            30.6
+            40.8,
+            30.3,
+            28.9
           ],
           "ensemble": [
-            39.1,
-            19.1,
-            41.8
+            40.1,
+            19.2,
+            40.7
           ]
         },
         "triangulation_ou": {
           "market_devig": [
-            50.1,
-            49.9
+            49.0,
+            51.0
           ],
           "dixon_coles": [
             54.3,
@@ -352,26 +94,26 @@
             50.0
           ],
           "ensemble": [
-            51.5,
-            48.5
+            51.1,
+            48.9
           ]
         },
         "triangulation_ah": {
           "market_devig": [
-            39.7,
-            60.3
+            41.3,
+            58.7
           ],
           "dixon_coles": [
             38.2,
             61.8
           ],
           "pinnacle": [
-            39.4,
-            60.6
+            40.8,
+            59.2
           ],
           "ensemble": [
-            39.1,
-            60.9
+            40.1,
+            59.9
           ]
         },
         "edge_summary": [
@@ -389,13 +131,13 @@
           },
           {
             "market": "O 2.5",
-            "edge": -3.6,
+            "edge": -3.4,
             "status": "⚪",
             "quarter_kelly_stake": 0
           },
           {
             "market": "U 2.5",
-            "edge": -3.4,
+            "edge": -3.6,
             "status": "⚪",
             "quarter_kelly_stake": 0
           }
@@ -406,14 +148,14 @@
           "tactical": "Spain (4-3-3 possession): Spain's high press is suffocating — they rank #1 for PPDA (opponent passes per defensive action) averaging 8.3. Rodri drops between CBs to initiate buildup in a 3-2-5. Yamal stays wide right, stretching France's defensive shape, while Nico Williams drifts inside. Pedri and Olmo rotate in the left half-space to create 3v2 overloads. Full-backs (Cucurella, Carvajal) push high to pin France's wingers back. Defensive vulnerability: Spain's high line leaves space in behind for Mbappe's runs — the full-backs must time their recovery runs perfectly.\n\nFrance (4-4-2 / 4-2-3-1 low block): Deschamps sets France up in a deep 4-4-2 mid-block, inviting Spain to possess while staying compact centrally. The key: France's wide midfielders (Coman/Dembele on right, Barcola/Thuram on left) tuck in to block passing lanes into Pedri/Olmo. Griezmann drops alongside Tchouameni when out of possession, creating a 4-4-1-1. In transition: Mbappe stays high and wide left — Spain's right-back Carvajal pushes forward aggressively, leaving space for Mbappe to exploit. France scored 3 of their 5 tournament goals on counter-attacks.\n\nKey tactical factors: (1) Spain's high press vs Tchouameni's composure under pressure — if France can't play through midfield, they'll go long for Mbappe. (2) Mbappe vs Carvajal mismatch — Carvajal (34) has struggled with pace all tournament. Expect France to target this with diagonal switches. (3) Set pieces: Spain score 30% of goals from set plays, France concede from 22% of corners faced. (4) Under 2.5 holds slight value — France's big games tend to be tight (3/4 knockouts under 2.5), but Spain's attacking form makes Over equally plausible. (5) Midfield battle: Rodri-Pedri-Olmo vs Tchouameni-Rabiot-Griezmann — Spain's technical edge vs France's physicality."
         },
         "ah_analysis": {
-          "home_minus_05_prob": 39.7,
-          "away_plus_05_prob": 60.3,
-          "home_0_prob": 39.7,
-          "away_0_prob": 60.3
+          "home_minus_05_prob": 41.3,
+          "away_plus_05_prob": 58.7,
+          "home_0_prob": 41.3,
+          "away_0_prob": 58.7
         },
         "ah_odds": {
-          "home_minus_05": 2.48,
-          "away_plus_05": 1.632
+          "home_minus_05": 2.385,
+          "away_plus_05": 1.677
         }
       }
     }

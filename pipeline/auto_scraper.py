@@ -1,10 +1,9 @@
 """
 auto_scraper.py — Fully automated odds scraper (no AI needed).
 
-Three data sources, cascading fallback:
+Three data sources:
   1. 1xBet Malaysia (cloudscraper → API) ← fastest, most reliable
-  2. 12Play MY     (Playwright headless login → 12SPORT)
-  3. the-odds-api  (HTTP, reliable backup)
+  2. the-odds-api  (HTTP, reliable backup — Pinnacle / Matchbook)
 
 Pipeline: scrape → merge → compute edges → write data.json → deploy
 
@@ -12,7 +11,6 @@ Usage:
   python pipeline/auto_scraper.py              # scrape all + update
   python pipeline/auto_scraper.py --dry-run     # print only, no write
   python pipeline/auto_scraper.py --skip-1xbet  # skip 1xBet
-  python pipeline/auto_scraper.py --skip-12play # skip 12Play
   python pipeline/auto_scraper.py --deploy      # scrape + build + deploy
   python pipeline/auto_scraper.py --force       # force even if data is fresh
 """
@@ -53,11 +51,6 @@ if env_path.exists():
 XBET_USERNAME = os.environ.get("XBET_USERNAME", "1733712589")
 XBET_PASSWORD = os.environ.get("XBET_PASSWORD", "Tapestry1Constrict1raking.")
 XBET_BASE = "https://1xbet-malaysia.mobi"
-
-# 12Play credentials
-PLAY12_USERNAME = os.environ.get("PLAY12_USERNAME", "lordirfan")
-PLAY12_PASSWORD = os.environ.get("PLAY12_PASSWORD", "lordirfan")
-PLAY12_BASE = "https://www.12play21.com"
 
 # the-odds-api
 ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "b45c8f0693e8a7912baf2449e98d6fb8")
@@ -291,292 +284,7 @@ def parse_xbet_game(value):
 
 
 # ═══════════════════════════════════════════
-# SOURCE 2: 12Play via undetected-chromedriver
-# ═══════════════════════════════════════════
-
-def scrape_12play():
-    """
-    Scrape World Cup odds from 12Play/12SPORT (12PSports.com).
-
-    Flow:
-    1. Login to 12Play via cloudscraper (fast, sets cookies)
-    2. Navigate undetected-chromedriver to 12PSports iframe URL
-    3. SSO auto-auths, sportsbook renders Malay odds
-    4. Extract and convert to decimal odds
-    """
-    import time, re, tempfile
-    
-    # Step 1: Login via cloudscraper (get auth cookies)
-    print("[12PLAY] Logging in via cloudscraper...")
-    try:
-        cscraper = cloudscraper.create_scraper()
-        cscraper.headers.update({
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/132.0.0.0 Safari/537.36",
-        })
-        cscraper.get(f"{PLAY12_BASE}/en-MY/login", timeout=15)
-        r = cscraper.post(
-            f"{PLAY12_BASE}/en-MY/login",
-            data={"username": PLAY12_USERNAME, "password": PLAY12_PASSWORD},
-            timeout=15,
-        )
-        if "MYR" in r.text:
-            print("[12PLAY] ✅ Cloudscraper login OK")
-        else:
-            print("[12PLAY] ⚠️ Cloudscraper login unsure, continuing...")
-    except Exception as e:
-        print(f"[12PLAY] ⚠️ Cloudscraper error: {e}")
-    
-    # Step 2: Use undetected-chromedriver to load 12PSports
-    print("[12PLAY] Launching headless browser for 12PSports...")
-    import undetected_chromedriver as uc
-    from selenium.webdriver.common.by import By
-    
-    options = uc.ChromeOptions()
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    ud = tempfile.mkdtemp()
-    options.add_argument(f"--user-data-dir={ud}")
-    
-    driver = uc.Chrome(options=options, headless=True, use_subprocess=True)
-    
-    try:
-        # Login to 12Play to establish session
-        driver.get(f"{PLAY12_BASE}/en-MY/login")
-        time.sleep(2)
-        driver.find_element(By.NAME, "username").send_keys(PLAY12_USERNAME)
-        driver.find_element(By.NAME, "password").send_keys(PLAY12_PASSWORD)
-        driver.find_element(By.XPATH, "//button[contains(text(), 'Login')]").click()
-        time.sleep(3)
-        
-        # Navigate DIRECTLY to 12PSports (bypass SPA click)
-        print("[12PLAY] Navigating to 12PSports...")
-        driver.get("https://www.12psports.com/game.php?currency=MYR&platform_origin=www.12play21.com")
-        
-        # Wait for SSO redirect and render
-        for i in range(12):
-            html = driver.page_source
-            body = re.sub(r'<[^>]+>', ' ', html)
-            body = re.sub(r'\s+', ' ', body)
-            
-            pat = r'(Spain|Belgium|Norway|England|Argentina|Switzerland|France)\s+(Spain|Belgium|Norway|England|Argentina|Switzerland|France)\s+1\s+(-?[\d.]+)\s+X\s+(-?[\d.]+)\s+2\s+(-?[\d.]+)'
-            matches = re.findall(pat, body)
-            if matches:
-                print(f"[12PLAY] ✅ Odds rendered ({len(matches)} matches)")
-                parsed = _parse_12sport_html(html)
-                driver.quit()
-                return parsed
-            time.sleep(2.5)
-        
-        driver.quit()
-        print("[12PLAY] ⚠️ No matches found after timeout")
-        return []
-        
-    except Exception as e:
-        print(f"[12PLAY] ❌ {e}")
-        try:
-            driver.quit()
-        except:
-            pass
-        return []
-
-
-# ─── 12SPORT HTML parser ───
-
-def _parse_12sport_html(html):
-    """
-    Parse 12PSports iframe HTML to extract match odds.
-    
-    12PSports renders match info in Malay odds format:
-        Norway England 1 -0.3534 X -0.3788 2 0.94
-    
-    Malay odds conversion:
-        Negative: Decimal = 1 + (1 / |malay|)
-        Positive: Decimal = 1 + malay
-    """
-    import re
-    
-    results = []
-    
-    # Strategy 1: Extract from body text (post-JS render)
-    body_text = re.sub(r'<[^>]+>', ' ', html)
-    body_text = re.sub(r'\s+', ' ', body_text)
-    
-    # Pattern: Team1 Team2 1 <malay_odds> X <malay_odds> 2 <malay_odds>
-    # Look for our specific matches
-    pattern = r'(Spain|Belgium|Norway|England|Argentina|Switzerland|France)\s+(Spain|Belgium|Norway|England|Argentina|Switzerland|France)\s+1\s+(-?[\d.]+)\s+X\s+(-?[\d.]+)\s+2\s+(-?[\d.]+)'
-    
-    matches = re.findall(pattern, body_text)
-    
-    for match in matches:
-        h_team, a_team, m1, mX, m2 = match
-        
-        mid = find_match_id(h_team, a_team)
-        if not mid:
-            continue
-        
-        def malay_to_decimal(m):
-            val = float(m)
-            if val < 0:
-                return round(1 + (1 / abs(val)), 3)
-            else:
-                return round(1 + val, 3)
-        
-        h_decimal = malay_to_decimal(m1)
-        d_decimal = malay_to_decimal(mX)
-        a_decimal = malay_to_decimal(m2)
-        
-        # Compute AH
-        if h_decimal > 0:
-            ah_home = h_decimal
-            if a_decimal > 0 and d_decimal > 0:
-                imp = 1/a_decimal + 1/d_decimal
-                ah_away = round(1/imp, 3) if imp > 0 else a_decimal
-            else:
-                ah_away = a_decimal
-        else:
-            ah_home = 0
-            ah_away = 0
-        
-        results.append({
-            "match_id": mid,
-            "home_team": MATCH_DB.get(mid, {}).get("home_team", h_team),
-            "away_team": MATCH_DB.get(mid, {}).get("away_team", a_team),
-            "odds": {
-                "h1": h_decimal,
-                "hX": d_decimal,
-                "h2": a_decimal,
-                "ah_home": ah_home,
-                "ah_away": ah_away,
-                "over": 0,
-                "under": 0,
-                "ou_point": 2.5,
-                "source": "12Play",
-            },
-        })
-        
-        print(f"  {h_team:12s} vs {a_team:12s} | Malay: {m1}/{mX}/{m2} → Decimal: {h_decimal:.3f}/{d_decimal:.3f}/{a_decimal:.3f}")
-    
-    return results
-
-
-def parse_12sport_html(html):
-    """
-    Parse 12SPORT page HTML.
-    Tries to find match odds from the rendered page.
-    """
-    matches = []
-    
-    # Strategy 1: JSON data in scripts
-    soup = BeautifulSoup(html, "lxml")
-    scripts = soup.find_all("script")
-    
-    for script in scripts:
-        text = script.string or ""
-        for pattern in [
-            r"window\.__NUXT__\s*=\s*({.*?});",
-            r"window\.__INITIAL_STATE__\s*=\s*({.*?});",
-        ]:
-            m = re.search(pattern, text, re.DOTALL)
-            if m:
-                try:
-                    data = json.loads(m.group(1))
-                    extracted = extract_12play_json(data)
-                    if extracted:
-                        matches.extend(extracted)
-                        return matches
-                except Exception:
-                    continue
-    
-    # Strategy 2: Parse table structure
-    # Look for team names and odds in visible text
-    body_text = soup.get_text()
-    
-    # Find match patterns like "Norway vs England" or "Argentina - Switzerland"
-    team_matches = []
-    for mid, mdata in MATCH_DB.items():
-        h = mdata["home_team"]
-        a = mdata["away_team"]
-        if h in body_text and a in body_text:
-            team_matches.append(mid)
-    
-    for mid in team_matches:
-        mdata = MATCH_DB[mid]
-        
-        # Find odds numbers near team names
-        # This is imprecise without proper HTML parsing
-        # Look for patterns like "1.59 3.91 6.00"
-        odds_pattern = re.findall(r">\s*(\d+\.\d{2,4})\s*<", html)
-        odds_floats = [float(o) for o in odds_pattern if 1.01 <= float(o) <= 15.0]
-        
-        if len(odds_floats) >= 6:
-            matches.append({
-                "match_id": mid,
-                "home_team": mdata["home_team"],
-                "away_team": mdata["away_team"],
-                "odds": {
-                    "h1": odds_floats[0],
-                    "hX": odds_floats[1],
-                    "h2": odds_floats[2],
-                    "ah_home": 1 / (1 / odds_floats[0]) if odds_floats[0] > 0 else 0,
-                    "ah_away": odds_floats[0],
-                    "over": odds_floats[3],
-                    "under": odds_floats[4],
-                    "ou_point": 2.5,
-                    "source": "12Play",
-                },
-            })
-    
-    return matches
-
-
-def extract_12play_json(data):
-    """Extract match odds from 12SPORT JSON data."""
-    extracted = []
-    
-    def search(obj, depth=0):
-        if depth > 5:
-            return
-        if isinstance(obj, dict):
-            home = obj.get("homeTeam") or obj.get("home_team") or obj.get("homeName") or ""
-            away = obj.get("awayTeam") or obj.get("away_team") or obj.get("awayName") or ""
-            if home and away:
-                mid = find_match_id(home, away)
-                if mid:
-                    odds = {}
-                    # Look for odds in various formats
-                    for k in ["odds", "prices", "markets", "values", "outcomes"]:
-                        v = obj.get(k, obj.get(k.upper(), {}))
-                        if isinstance(v, dict):
-                            odds.update(v)
-                    
-                    extracted.append({
-                        "match_id": mid,
-                        "home_team": MATCH_DB[mid]["home_team"],
-                        "away_team": MATCH_DB[mid]["away_team"],
-                        "odds": {
-                            "h1": float(odds.get("home", odds.get("1", odds.get("W1", 0)))),
-                            "hX": float(odds.get("draw", odds.get("X", odds.get("DRAW", 0)))),
-                            "h2": float(odds.get("away", odds.get("2", odds.get("W2", 0)))),
-                            "over": float(odds.get("over", 0)),
-                            "under": float(odds.get("under", 0)),
-                            "ou_point": 2.5,
-                            "source": "12Play",
-                        },
-                    })
-                    return
-            
-            for v in obj.values():
-                search(v, depth + 1)
-        elif isinstance(obj, list):
-            for item in obj:
-                search(item, depth + 1)
-    
-    search(data)
-    return extracted
-
-
-# ═══════════════════════════════════════════
-# SOURCE 3: the-odds-api (HTTP fallback)
+# SOURCE 2: the-odds-api (HTTP fallback)
 # ═══════════════════════════════════════════
 
 def scrape_api():
@@ -678,10 +386,10 @@ def convert_api_data(api_data):
 
 def merge_odds(source_list):
     """
-    Merge odds from sources. Priority: 1xBet > 12Play > the-odds-api.
+    Merge odds from sources. Priority: 1xBet > the-odds-api.
     """
     merged = {}
-    priority = {"1xBet": 0, "12Play": 1, "the-odds-api": 2}
+    priority = {"1xBet": 0, "the-odds-api": 1}
     
     for source_name, odds_list in source_list:
         for entry in odds_list:
@@ -1437,7 +1145,6 @@ def main():
     dry_run = "--dry-run" in sys.argv
     do_deploy = "--deploy" in sys.argv
     skip_1xbet = "--skip-1xbet" in sys.argv or "SKIP_1XBET" in os.environ
-    skip_12play = "--skip-12play" in sys.argv or "SKIP_12PLAY" in os.environ
     force = "--force" in sys.argv
     
     print(f"{'='*60}")
@@ -1471,20 +1178,9 @@ def main():
     else:
         print("\n1xBet: ⏭️ Skipped")
     
-    # Source 2: 12Play (Playwright, slower)
-    if not skip_12play:
-        print(f"\n{'─'*40}")
-        print("SOURCE 2: 12Play MY")
-        print(f"{'─'*40}")
-        p12 = scrape_12play()
-        if p12:
-            sources.append(("12Play", p12))
-    else:
-        print("\n12Play: ⏭️ Skipped")
-    
-    # Source 3: the-odds-api (also provides raw data for Pinnacle extraction)
+    # Source 2: the-odds-api (also provides raw data for Pinnacle extraction)
     print(f"\n{'─'*40}")
-    print("SOURCE 3: the-odds-api (fallback)")
+    print("SOURCE 2: the-odds-api (fallback)")
     print(f"{'─'*40}")
     api_result = scrape_api()
     raw_api_data = []
