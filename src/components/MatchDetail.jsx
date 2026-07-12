@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  ArrowLeft,
-  AlertTriangle,
-  TrendingUp,
-  Info,
-} from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import EdgeBadge from './EdgeBadge';
-import TriangulationTable from './TriangulationTable';
 import { evaluateMarket } from '../lib/simulator';
 
 /* ---------- helpers ---------- */
@@ -140,96 +134,43 @@ export default function MatchDetail() {
           <div className="text-[0.55rem] sm:text-[0.6rem] text-muted mb-3 uppercase tracking-wider">
             📊 Edge Analysis — AH &amp; O/U (1xBet vs Betfair)
           </div>
-          <div className="overflow-x-auto scroll-hint">
-            <table className="terminal-grid w-full min-w-[450px]">
-              <thead>
-                <tr>
-                  <th className="text-left">Market</th>
-                  <th className="text-right num-mono">1xBet Implied</th>
-                  <th className="text-right num-mono">True Price</th>
-                  <th className="text-right num-mono">Edge %</th>
-                  <th className="text-center">Call</th>
-                </tr>
-              </thead>
-              <tbody>
-                {analysis.edge_summary.map((e, i) => {
-                  const edgePct = e.edge;
-
-                  /* ---- Lookup Polymarket DV + back-calc 12SPORT implied ---- */
-                  let twelvesportPct = null;
-                  let polymarketPct = null;
-
-                  // AH -0.5 / +0.5: from match.home_odds / match.away_odds + ah_analysis
-                  if (e.market.includes('(AH)')) {
-                    if (e.market.includes(home_team)) {
-                      // Home -0.5: 12SPORT implied from odds, Poly from home_minus_05_prob
-                      const ahAnalysis = analysis.ah_analysis || {};
-                      twelvesportPct = match.home_odds ? (1 / match.home_odds) * 100 : null;
-                      polymarketPct = ahAnalysis.home_minus_05_prob || null;
-                    } else {
-                      // Away +0.5
-                      const ahAnalysis = analysis.ah_analysis || {};
-                      twelvesportPct = match.away_odds ? (1 / match.away_odds) * 100 : null;
-                      polymarketPct = ahAnalysis.away_plus_05_prob || null;
-                    }
-                  }
-
-                  // O/U 2.5: triangulation_ou index 0 = Over, index 1 = Under
-                  if (!polymarketPct && analysis.triangulation_ou?.polymarket) {
-                    if (e.market.startsWith('O ')) {
-                      polymarketPct = analysis.triangulation_ou.polymarket[0];
-                    } else if (e.market.startsWith('U ')) {
-                      polymarketPct = analysis.triangulation_ou.polymarket[1];
-                    }
-                  }
-
-                  // Back-calculate 12SPORT implied from edge & Polymarket DV
-                  if (twelvesportPct === null && polymarketPct !== null && edgePct !== 0) {
-                    twelvesportPct = polymarketPct / (1 + edgePct / 100);
-                  }
-                  if (polymarketPct === null && twelvesportPct !== null && edgePct !== 0) {
-                    polymarketPct = twelvesportPct * (1 + edgePct / 100);
-                  }
-
-                  const twelvesportDecimal = (twelvesportPct !== null && twelvesportPct !== 0) ? (100 / twelvesportPct) : null;
-
-                  let cls, callLabel, callBadge;
-                  if (edgePct > 20) {
-                    cls = 'text-accent-green font-bold'; callLabel = '🚀 KELLY';
-                    callBadge = 'edge-positive-pulse inline-block px-2 py-0.5 rounded text-[0.5rem] font-bold bg-accent-green/20 text-accent-green';
-                  } else if (edgePct >= 5) {
-                    cls = 'text-green-400'; callLabel = '✅ VALUE';
-                    callBadge = 'inline-block px-2 py-0.5 rounded text-[0.5rem] font-bold bg-green-500/15 text-green-400';
-                  } else if (edgePct >= -5) {
-                    cls = 'text-muted'; callLabel = '⚪ PASS';
-                    callBadge = 'inline-block px-2 py-0.5 rounded text-[0.5rem] font-bold bg-accent-gray/15 text-muted';
-                  } else {
-                    cls = 'text-accent-red'; callLabel = '❌ AVOID';
-                    callBadge = 'inline-block px-2 py-0.5 rounded text-[0.5rem] font-bold bg-accent-red/15 text-accent-red';
-                  }
-
-                  return (
-                    <tr key={i}>
-                      <td className="text-left text-xs text-white/80">{e.market}</td>
-                      <td className="text-right num-mono text-white/70">
-                        {twelvesportPct !== null
-                          ? <>{twelvesportPct.toFixed(1)}%<br /><span className="text-[0.5rem] text-muted">{twelvesportDecimal ? twelvesportDecimal.toFixed(2) : '-'}</span></>
-                          : '-'}
-                      </td>
-                      <td className="text-right num-mono text-accent-cyan">
-                        {polymarketPct !== null ? polymarketPct.toFixed(1) + '%' : '-'}
-                      </td>
-                      <td className={`text-right num-mono ${cls}`}>
-                        {edgePct > 0 ? '+' : ''}{edgePct.toFixed(1)}%
-                      </td>
-                      <td className="text-center">
-                        <span className={callBadge}>{callLabel}</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="overflow-x-auto -mx-2 px-2">
+            <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-2 gap-y-2 text-[0.55rem] min-w-[300px]">
+              <div className="text-muted text-left text-[0.5rem] font-bold uppercase">Market</div>
+              <div className="text-right text-accent-cyan font-bold text-[0.5rem] uppercase">1xBet</div>
+              <div className="text-right text-purple-400 font-bold text-[0.5rem] uppercase">Betfair</div>
+              <div className="text-right font-bold text-[0.5rem] uppercase text-muted">Edge</div>
+              <div className="text-center font-bold text-[0.5rem] uppercase text-muted">Call</div>
+              {analysis.edge_summary.map((e, i) => {
+                const label = (e.market || '').replace(/\s*\(1xBet vs (Betfair)\)/, '');
+                const xb = e.xbet_price;
+                const bf = e.betfair_price;
+                const edgePct = e.edge || 0;
+                let ec, callLabel, callBadge;
+                if (edgePct > 20) {
+                  ec = 'text-accent-green font-bold'; callLabel = '🚀 KELLY';
+                  callBadge = 'edge-positive-pulse inline-block px-1.5 py-0.5 rounded text-[0.5rem] font-bold bg-accent-green/20 text-accent-green';
+                } else if (edgePct >= 5) {
+                  ec = 'text-green-400'; callLabel = '✅ VALUE';
+                  callBadge = 'inline-block px-1.5 py-0.5 rounded text-[0.5rem] font-bold bg-green-500/15 text-green-400';
+                } else if (edgePct >= -5) {
+                  ec = 'text-muted'; callLabel = '⚪ PASS';
+                  callBadge = 'inline-block px-1.5 py-0.5 rounded text-[0.5rem] font-bold bg-accent-gray/15 text-muted';
+                } else {
+                  ec = 'text-accent-red'; callLabel = '❌ AVOID';
+                  callBadge = 'inline-block px-1.5 py-0.5 rounded text-[0.5rem] font-bold bg-accent-red/15 text-accent-red';
+                }
+                return (
+                  <div key={i} className="contents">
+                    <div className="text-white/80 truncate text-left">{label}</div>
+                    <div className="text-right text-accent-cyan num-mono">{xb ? xb.toFixed(2) : '-'}</div>
+                    <div className="text-right text-purple-400 num-mono">{bf ? bf.toFixed(2) : '-'}</div>
+                    <div className={`text-right num-mono ${ec}`}>{edgePct > 0 ? '+' : ''}{edgePct.toFixed(1)}%</div>
+                    <div className="text-center"><span className={callBadge}>{callLabel}</span></div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
           <div className="mt-2 text-[0.55rem] text-muted text-center">
             Betfair Exchange = back/lay midpoint (true price) · 1xBet = odds you bet
@@ -315,132 +256,32 @@ export default function MatchDetail() {
         </div>
       </div>
 
-      {/* ---- 3-4. Triangulation Tables ---- */}
-      <div className="mb-4 sm:mb-6">
-        <h2 className="section-header">3-4. Multi-Model Probability Triangulation</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-          <TriangulationTable
-            title="AH 0 (Draw No Bet)"
-            sources={analysis.triangulation_ah}
-            headers={[`${home_team} (DNB)`, `${away_team} (DNB)`]}
-            decimals={1}
-          />
-          <TriangulationTable
-            title="O/U 2.5 Total Goals"
-            sources={analysis.triangulation_ou}
-            headers={['Over 2.5', 'Under 2.5']}
-            decimals={1}
-          />
-        </div>
-        <div className="mt-2 text-[0.5rem] text-muted text-center px-2">
-                  <span className="text-accent-cyan">1xBet Devigged</span> = zero-vig implied probs from primary bookie &nbsp;·&nbsp;
-                  <span className="text-accent-yellow">Dixon-Coles</span> = Poisson goal model (real statistical model) &nbsp;·&nbsp;
-                  <span className="text-purple-400">Betfair Exchange</span> = back/lay midpoint (true price) &nbsp;·&nbsp;
-                  <span className="text-white">ENSEMBLE</span> = average of all available sources
-        </div>
-      </div>
-
-      {/* ---- 5. Narrative ---- */}
-      <div className="mb-4 sm:mb-6">
-        <h2 className="section-header">5. Narrative &amp; Key Factors</h2>
-        <div className="card space-y-3">
-          {analysis.narrative?.form && (
-            <div className="flex gap-3">
-              <TrendingUp className="w-4 h-4 text-accent-cyan shrink-0 mt-0.5" />
-              <div>
-                <div className="text-[0.6rem] text-muted uppercase tracking-wider mb-0.5">
-                  Form
-                </div>
-                <div className="text-xs text-white/80">
-                  {analysis.narrative.form}
-                </div>
-              </div>
-            </div>
-          )}
-          {analysis.narrative?.injuries && (
-            <div className="flex gap-3">
-              <AlertTriangle className="w-4 h-4 text-accent-yellow shrink-0 mt-0.5" />
-              <div>
-                <div className="text-[0.6rem] text-muted uppercase tracking-wider mb-0.5">
-                  Injuries
-                </div>
-                <div className="text-xs text-white/80">
-                  {analysis.narrative.injuries}
-                </div>
-              </div>
-            </div>
-          )}
-          {analysis.narrative?.tactical && (
-            <div className="flex gap-3">
-              <Info className="w-4 h-4 text-accent-green shrink-0 mt-0.5" />
-              <div>
-                <div className="text-[0.6rem] text-muted uppercase tracking-wider mb-0.5">
-                  Tactical
-                </div>
-                <div className="text-xs text-white/80">
-                  {analysis.narrative.tactical}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ---- 5b. Key Probabilities ---- */}
+      {/* ---- 5. Key Market Data ---- */}
       {analysis.sport_raw?.home > 0 && (
         <div className="mb-4 sm:mb-6">
-          <h2 className="section-header">
-            5b. Key Market Probabilities
-          </h2>
+          <h2 className="section-header">5. Key Market Data</h2>
           <div className="card">
-            {/* Asian Handicap -0.5 */}
-            <div className="mb-3">
-              <div className="text-[0.6rem] text-muted uppercase tracking-wider mb-1.5">
-                Asian Handicap -0.5
+            <div className="text-[0.55rem] text-muted space-y-1">
+              <div className="flex justify-between">
+                <span>Home (AH -0.5):</span>
+                <span className="text-accent-cyan font-bold">{analysis.sport_raw.home.toFixed(3)}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-center">
-                <div className="bg-dark-700/50 rounded p-2">
-                  <div className="text-[0.5rem] text-muted uppercase mb-0.5">{match.home_team} -0.5</div>
-                  <div className="text-sm font-bold text-white">{(1 / analysis.sport_raw.home * 100).toFixed(1)}%</div>
-                  <div className="text-[0.45rem] text-muted">
-                    @ {analysis.sport_raw.home.toFixed(3)} | Fair {(analysis.polymarket_devig?.home || 0) * 100 > 0 ? (analysis.polymarket_devig.home * 100).toFixed(1) : '-'}%
-                  </div>
+              {analysis.sport_raw.draw && (
+                <div className="flex justify-between">
+                  <span>Draw:</span>
+                  <span className="text-accent-cyan font-bold">{analysis.sport_raw.draw.toFixed(3)}</span>
                 </div>
-                <div className="bg-dark-700/50 rounded p-2">
-                  <div className="text-[0.5rem] text-muted uppercase mb-0.5">{match.away_team} +0.5</div>
-                  <div className="text-sm font-bold text-white">{(1 / analysis.sport_raw.away * 100).toFixed(1)}%</div>
-                  <div className="text-[0.45rem] text-muted">
-                    @ {analysis.sport_raw.away.toFixed(3)} | Fair {(analysis.polymarket_devig?.away || 0) * 100 > 0 ? (analysis.polymarket_devig.away * 100).toFixed(1) : '-'}%
-                  </div>
-                </div>
+              )}
+              <div className="flex justify-between">
+                <span>Away (AH +0.5):</span>
+                <span className="text-accent-cyan font-bold">{analysis.sport_raw.away.toFixed(3)}</span>
               </div>
-            </div>
-
-            {/* O/U 2.5 */}
-            {analysis.sport_raw.over_odds > 0 && (
-              <div className="mb-3">
-                <div className="text-[0.6rem] text-muted uppercase tracking-wider mb-1.5">
-                  Over/Under {analysis.sport_raw.ou_point || 2.5} Goals
+              {analysis.sport_raw.over_odds && (
+                <div className="flex justify-between">
+                  <span>Over {analysis.sport_raw.ou_point || 2.5}:</span>
+                  <span className="text-accent-cyan font-bold">{analysis.sport_raw.over_odds.toFixed(3)}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-center">
-                  <div className="bg-dark-700/50 rounded p-2">
-                    <div className="text-[0.5rem] text-muted uppercase mb-0.5">Over {analysis.sport_raw.ou_point || 2.5}</div>
-                    <div className="text-sm font-bold text-white">{(1 / analysis.sport_raw.over_odds * 100).toFixed(1)}%</div>
-                    <div className="text-[0.45rem] text-muted">@ {analysis.sport_raw.over_odds.toFixed(2)}</div>
-                  </div>
-                  <div className="bg-dark-700/50 rounded p-2">
-                    <div className="text-[0.5rem] text-muted uppercase mb-0.5">Under {analysis.sport_raw.ou_point || 2.5}</div>
-                    <div className="text-sm font-bold text-white">{(1 / analysis.sport_raw.under_odds * 100).toFixed(1)}%</div>
-                    <div className="text-[0.45rem] text-muted">@ {analysis.sport_raw.under_odds.toFixed(2)}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-2 text-[0.5rem] text-muted text-center leading-relaxed">
-              <span className="text-white/90">% shown</span> = implied probability (1/odds) &nbsp;·&nbsp;
-              <span className="text-accent-cyan">Fair</span> = devigged probability &nbsp;·&nbsp;
-              Vig = sum of implied % − 100%
+              )}
             </div>
           </div>
         </div>

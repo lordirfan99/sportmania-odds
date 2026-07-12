@@ -12,7 +12,9 @@ from pathlib import Path
 
 import requests
 
-API_KEY = os.environ.get("ODDSAPI_IO_KEY", "b714b5b2031aaffaf285919df834adb2b873321629f6331939f6a7571150aca1")
+API_KEY = os.environ.get("ODDSAPI_IO_KEY")
+if not API_KEY:
+    raise ValueError("ODDSAPI_IO_KEY environment variable not set. Create a .env file with your key.")
 BASE_URL = "https://api.odds-api.io/v3"
 
 # Active leagues to track (by slugs)

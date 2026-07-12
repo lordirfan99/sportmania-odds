@@ -136,7 +136,7 @@ function calcHistorical(marketName, edge, betHistory) {
  */
 export function evaluateMarket(marketEntry, homeTeam, awayTeam, analysis, betHistory = [], config = {}) {
   const cfg = { ...CONFIG, ...config };
-  const { market, edge } = marketEntry;
+  const { market, edge, xbet_price, betfair_price, quarter_kelly_stake } = marketEntry;
 
   const gates = { gate1: null, gate2: null, gate3: null };
   let reason = '';
@@ -205,6 +205,8 @@ export function evaluateMarket(marketEntry, homeTeam, awayTeam, analysis, betHis
   return {
     market,
     edge,
+    xbet_price,
+    betfair_price,
     kellyPct: marketEntry.quarter_kelly_stake || 0,
     decision,
     confidence,

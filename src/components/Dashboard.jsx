@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Activity,
@@ -57,69 +57,6 @@ function DecisionBadge({ decision, confidence }) {
   );
 }
 
-/* ---------- confetti canvas ---------- */
-function ConfettiCanvas({ active }) {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    if (!active) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let animationFrameId;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', resize);
-    resize();
-
-    const colors = ['#f43f5e', '#ec4899', '#d946ef', '#a855f7', '#8b5cf6', '#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b'];
-    const particles = Array.from({ length: 120 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height - canvas.height,
-      r: Math.random() * 4 + 4,
-      d: Math.random() * canvas.height,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      tilt: Math.random() * 10 - 5,
-      tiltAngleIncremental: Math.random() * 0.07 + 0.02,
-      tiltAngle: 0
-    }));
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p) => {
-        p.tiltAngle += p.tiltAngleIncremental;
-        p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-        p.x += Math.sin(p.tiltAngle);
-        p.tilt = Math.sin(p.tiltAngle - (p.r / 2)) * 15;
-
-        if (p.y > canvas.height) {
-          p.x = Math.random() * canvas.width;
-          p.y = -20;
-          p.tilt = Math.random() * 10 - 5;
-        }
-
-        ctx.beginPath();
-        ctx.lineWidth = p.r;
-        ctx.strokeStyle = p.color;
-        ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
-        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
-        ctx.stroke();
-      });
-      animationFrameId = requestAnimationFrame(draw);
-    };
-
-    draw();
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [active]);
-
-  if (!active) return null;
-  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-50 w-full h-full" />;
-}
-
 /* ---------- main component ---------- */
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -138,7 +75,6 @@ export default function Dashboard() {
   const [bankrollAmount, setBankrollAmount] = useState('');
   const [bankrollNote, setBankrollNote] = useState('');
   const [bankrollAction, setBankrollAction] = useState('deposit');
-  const [partyMode, setPartyMode] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [activeLeague, setActiveLeague] = useState('all');
   const navigate = useNavigate();
@@ -310,15 +246,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={`transition-all duration-500 ${partyMode ? 'party-theme min-h-screen' : ''}`}>
-      <ConfettiCanvas active={partyMode} />
+    <div className="transition-all duration-500">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-20 sm:pb-6">
         {/* ---- Header ---- */}
         <div className="mb-4 sm:mb-6 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <BarChart3 className={`w-5 h-5 shrink-0 ${partyMode ? 'text-accent-green animate-spin' : 'text-accent-cyan'}`} />
-              <h1 className={`text-base sm:text-lg font-bold tracking-wider ${partyMode ? 'party-title' : 'text-white'}`}>BETTING ENGINE v2.0</h1>
+              <BarChart3 className={`w-5 h-5 shrink-0 text-accent-cyan`} />
+              <h1 className={`text-base sm:text-lg font-bold tracking-wider text-white`}>BETTING ENGINE v2.0</h1>
             </div>
             <div className="text-[0.55rem] sm:text-[0.6rem] text-muted tracking-[0.2em] uppercase">
               {matches.length} Matches · {leagues.length} Leagues · Cron every 3h
@@ -330,12 +265,6 @@ export default function Dashboard() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.6rem] font-bold tracking-wider bg-dark-700 text-muted hover:text-white border border-dark-500 hover:border-accent-cyan/30 transition-all mobile-touch cursor-pointer"
             >
               ❓ GUIDE
-            </button>
-            <button
-              onClick={() => setPartyMode(!partyMode)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.6rem] font-black tracking-wider transition-all duration-300 mobile-touch cursor-pointer ${partyMode ? 'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.6)] border-transparent scale-105 animate-pulse' : 'bg-dark-700 text-muted hover:text-white border border-dark-500 hover:border-accent-cyan/30'}`}
-            >
-              {partyMode ? '🥳 PARTY ON' : '🎈 PARTY OFF'}
             </button>
           </div>
         </div>
@@ -462,10 +391,10 @@ export default function Dashboard() {
                         <div className="text-right text-accent-cyan font-bold">1xBet</div>
                         <div className="text-right text-purple-400 font-bold">Betfair</div>
                         <div className="text-right font-bold text-muted">Edge</div>
-                        {ev.decisions.filter(d => d.market?.includes('(1xBet vs Betfair)') || d.market?.includes('(1xBet vs Pinnacle)')).map((d, i) => {
-                          const label = d.market.replace(/\s*\(1xBet vs (Betfair|Pinnacle)\)/, '');
+                        {ev.decisions.filter(d => d.market?.includes('(1xBet vs Betfair)')).map((d, i) => {
+                          const label = d.market.replace(/\s*\(1xBet vs Betfair\)/, '');
                           const xb = d.xbet_price || d.xbetPrice || null;
-                          const bf = d.betfair_price || d.pinnacle_price || d.betfairPrice || null;
+                          const bf = d.betfair_price || d.betfairPrice || null;
                           const ec = d.edge > 5 ? 'text-accent-green' : d.edge > -5 ? 'text-muted' : 'text-accent-red';
                           return (
                             <div key={i} className="contents">
@@ -476,7 +405,7 @@ export default function Dashboard() {
                             </div>
                           );
                         })}
-                        {(!ev.decisions.some(d => d.market?.includes('(1xBet vs Betfair)') || d.market?.includes('(1xBet vs Pinnacle)'))) && (
+                        {(!ev.decisions.some(d => d.market?.includes('(1xBet vs Betfair)'))) && (
                           <div className="col-span-4 text-center text-muted py-1 text-[0.5rem]">No Betfair data</div>
                         )}
                       </div>
@@ -908,7 +837,7 @@ export default function Dashboard() {
                   value={bankrollNote}
                   onChange={(e) => setBankrollNote(e.target.value)}
                   className="w-full bg-dark-900 border border-dark-500 rounded px-3 py-2 text-xs text-white focus:border-accent-cyan outline-none"
-                  placeholder={bankrollAction === 'deposit' ? 'Deposit from bank' : 'Withdraw to 12play'}
+                  placeholder={bankrollAction === 'deposit' ? 'Deposit from bank' : 'Withdraw to bank'}
                 />
               </div>
 
@@ -1002,7 +931,7 @@ export default function Dashboard() {
                 <h4 className="text-white font-bold mb-2 uppercase tracking-wide text-xs">⚖️ 2. Triangulation Models</h4>
                 <p className="text-muted mb-2">Rather than relying on one predictor, our engine synthesizes probabilities from 6 sources:</p>
                 <ul className="list-disc pl-4 space-y-1 text-muted">
-                  <li><strong className="text-white/90">Polymarket</strong>: Real-time consensus from global prediction markets.</li>
+                  <li><strong className="text-white/90">Betfair Exchange</strong>: Midpoint price — true market probability.</li>
                   <li><strong className="text-white/90">Dataset 49K</strong>: Historical outcomes from a 49,000-match historical database.</li>
                   <li><strong className="text-white/90">Opta Analyst</strong>: Professional sports analytics and team statistics.</li>
                   <li><strong className="text-white/90">xGscore</strong>: Mathematical expected goals models.</li>
