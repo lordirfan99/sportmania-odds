@@ -50,7 +50,7 @@ export default function MatchDetail() {
       </div>
     );
 
-  const match = data.matches.find((m) => m.id === matchId);
+  const match = data.matches.find((m) => (m.match_id || m.id) === matchId);
   if (!match)
     return (
       <div className="flex items-center justify-center h-screen bg-dark-900">

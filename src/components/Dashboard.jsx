@@ -212,12 +212,29 @@ export default function Dashboard() {
   // mergedBets + liveStatus already loaded from persistent store in useEffect
   const allBets = mergedBets;
 
+  // ── League filter state ──
+  const [activeLeague, setActiveLeague] = useState('all');
+  
+  // Extract unique leagues
+  const leagues = [...new Set(allMatches.map(m => m.league_name || m.stage || 'Other'))].sort();
+
   // Filter upcoming matches
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const matches = allMatches.filter((m) => {
-    const matchDate = new Date(m.date + 'T23:59:59');
-    return matchDate >= today && !m.settled;
+    const dateStr = m.date || (m.commence_time ? m.commence_time.slice(0,10) : '');
+    if (!dateStr) return activeLeague === 'all' || (m.league_name || m.stage || 'Other') === activeLeague;
+    const matchDate = new Date(dateStr + 'T23:59:59');
+    const leagueMatch = activeLeague === 'all' || (m.league_name || m.stage || 'Other') === activeLeague;
+    return matchDate >= today && !m.settled && leagueMatch;
+  });
+
+  // Group by league for display
+  const grouped = {};
+  matches.forEach(m => {
+    const league = m.league_name || m.stage || 'Other';
+    if (!grouped[league]) grouped[league] = [];
+    grouped[league].push(m);
   });
 
   const bankroll = liveStatus.bankroll_rm;
@@ -233,19 +250,20 @@ export default function Dashboard() {
 
   // Pre-compute system evaluations for each match
   const matchEvals = Object.fromEntries(
-    matches.map((m) => [m.id, evaluateMatch(m, allBets || [])])
+    matches.map((m) => [m.match_id || m.id, evaluateMatch(m, allBets || [])])
   );
 
   // Divergence tracking
   const systemBets = [];
   const userBets = allBets;
   matches.forEach((m) => {
-    const evalResult = matchEvals[m.id];
+    const mid = m.match_id || m.id;
+    const evalResult = matchEvals[mid];
     if (!evalResult) return;
     evalResult.decisions.forEach((d) => {
       if (d.decision === 'BET') {
         systemBets.push({ 
-          matchId: m.id, 
+          matchId: mid, 
           home_team: m.home_team,
           away_team: m.away_team,
           ...d 
@@ -305,7 +323,7 @@ export default function Dashboard() {
               <h1 className={`text-base sm:text-lg font-bold tracking-wider ${partyMode ? 'party-title' : 'text-white'}`}>BETTING ENGINE v2.0</h1>
             </div>
             <div className="text-[0.55rem] sm:text-[0.6rem] text-muted tracking-[0.2em] uppercase">
-              6-Layer Ensemble · World Cup 2026 · Cron every 1h
+              {matches.length} Matches · {leagues.length} Leagues · Cron every 3h
             </div>
           </div>
           <div className="flex items-center gap-1.5">
@@ -368,6 +386,38 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ── League Filter ── */}
+      <div className="mb-4 sm:mb-6 overflow-x-auto scroll-hint -mx-2 sm:mx-0">
+        <div className="flex gap-1.5 px-2 sm:px-0 min-w-max">
+          <button
+            onClick={() => setActiveLeague('all')}
+            className={`px-3 py-1.5 rounded-full text-[0.55rem] font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              activeLeague === 'all'
+                ? 'bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/40'
+                : 'bg-dark-700 text-muted hover:text-white border border-dark-500 hover:border-accent-cyan/30'
+            }`}
+          >
+            🏆 All ({matches.length})
+          </button>
+          {leagues.map(l => {
+            const count = allMatches.filter(m => (m.league_name || m.stage || 'Other') === l).length;
+            return (
+              <button
+                key={l}
+                onClick={() => setActiveLeague(l)}
+                className={`px-3 py-1.5 rounded-full text-[0.55rem] font-bold tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                  activeLeague === l
+                    ? 'bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/40'
+                    : 'bg-dark-700 text-muted hover:text-white border border-dark-500 hover:border-accent-cyan/30'
+                }`}
+              >
+                {l} ({count})
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* ════════════════════════════════════════ */}
       {/* 🧠 SYSTEM SAYS — Shadow Betting Decisions */}
       {/* ════════════════════════════════════════ */}
@@ -383,7 +433,7 @@ export default function Dashboard() {
           </div>
           <div className="text-muted leading-relaxed text-[0.62rem] space-y-1.5">
             <p>
-              This engine uses the <strong className="text-white/80">BMAD-METHOD</strong> to cross-reference betting odds from 1xBet, 12Play, and the-odds-api against 6 analytics models (Triangulation).
+              This engine uses multi-model triangulation to cross-reference betting odds from the-odds-api (Pinnacle, Matchbook) and 1xBet against 6 analytics models.
             </p>
             <p>
               Every market is filtered through 3 verification gates: 
@@ -395,97 +445,109 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid gap-3">
-          {matches.map((m) => {
-            const ev = matchEvals[m.id];
-            if (!ev) return null;
-            return (
-              <div key={m.id} className="card">
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-white">{m.home_team}</span>
-                    <span className="text-muted text-xs">v</span>
-                    <span className="font-bold text-sm text-white">{m.away_team}</span>
-                    <span className="text-[0.55rem] text-muted ml-1">· {m.stage}</span>
-                  </div>
-                  <div className="flex gap-2 text-[0.55rem]">
-                    <span className="text-accent-green">{ev.summary.bet} BET</span>
-                    <span className="text-muted">/</span>
-                    <span className="text-accent-red">{ev.summary.skip} SKIP</span>
-                  </div>
-                </div>
+        {/* ── League Sections ── */}
+        {Object.entries(grouped).map(([league, leagueMatches]) => (
+          <div key={league} className="mb-6">
+            <div className="flex items-center gap-2 mb-3 mt-2">
+              <span className="text-[0.65rem] font-bold text-accent-cyan uppercase tracking-wider">{league}</span>
+              <span className="text-[0.5rem] text-muted">({leagueMatches.length} matches)</span>
+              <div className="flex-1 h-px bg-dark-600/50 ml-2" />
+            </div>
+            <div className="grid gap-3">
+              {leagueMatches.map((m) => {
+                const mid = m.match_id || m.id;
+                const ev = matchEvals[mid];
+                if (!ev) return null;
+                return (
+                  <div key={mid} className="card cursor-pointer hover:border-accent-cyan/20 transition-all"
+                    onClick={() => navigate(`/match/${mid}`)}>
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-white">{m.home_team}</span>
+                        <span className="text-muted text-xs">v</span>
+                        <span className="font-bold text-sm text-white">{m.away_team}</span>
+                        {m.venue && <span className="text-[0.5rem] text-muted ml-1 hidden sm:inline">· {m.venue}</span>}
+                      </div>
+                      <div className="flex gap-2 text-[0.55rem]">
+                        <span className="text-accent-green">{ev.summary.bet} BET</span>
+                        <span className="text-muted">/</span>
+                        <span className="text-accent-red">{ev.summary.skip} SKIP</span>
+                      </div>
+                    </div>
 
-                {/* Decision matrix table */}
-                <div className="overflow-x-auto scroll-hint">
-                  <table className="terminal-grid w-full min-w-[400px]">
-                    <thead>
-                      <tr>
-                        <th className="text-left">Market</th>
-                        <th className="text-right num-mono">Edge %</th>
-                        <th className="text-center num-mono">G1 (Edge)</th>
-                        <th className="text-center num-mono">G2 (Consensus)</th>
-                        <th className="text-center num-mono">G3 (History)</th>
-                        <th className="text-center">Decision</th>
-                        <th className="text-right num-mono">Kelly</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ev.decisions.map((d, i) => {
-                        const g1 = d.gates.gate1;
-                        const g2 = d.gates.gate2;
-                        const g3 = d.gates.gate3;
-                        return (
-                          <tr key={i}>
-                            <td className="text-left text-xs text-white/80">
-                              <div>{d.market}</div>
-                              {d.reason && (
-                                <div className="text-[0.55rem] text-muted/65 mt-0.5 max-w-[200px] truncate" title={d.reason}>
-                                  {d.reason}
-                                </div>
-                              )}
-                            </td>
-                            <td className={`text-right num-mono text-xs ${d.edge > 20 ? 'text-accent-green font-bold' : d.edge >= 5 ? 'text-green-400' : d.edge >= -5 ? 'text-muted' : 'text-accent-red'}`}>
-                              {d.edge > 0 ? '+' : ''}{d.edge.toFixed(1)}%
-                            </td>
-                            <td className={`text-center text-[0.6rem] font-medium ${g1 === true ? 'text-accent-green' : g1 === false ? 'text-accent-red' : 'text-muted'}`}>
-                              {g1 === true ? '✅ PASS' : g1 === false ? '❌ FAIL' : '·'}
-                            </td>
-                            <td className={`text-center text-[0.6rem] font-medium ${g2 === true ? 'text-accent-green' : g2 === false ? 'text-accent-red' : 'text-muted'}`}>
-                              {g2 === true ? (
-                                <span>✅ {d.consensus ? `σ=${d.consensus.stdDevPct.toFixed(1)}%` : 'PASS'}</span>
-                              ) : g2 === false ? (
-                                <span>❌ {d.consensus ? `σ=${d.consensus.stdDevPct.toFixed(1)}%` : 'FAIL'}</span>
-                              ) : '·'}
-                            </td>
-                            <td className={`text-center text-[0.6rem] font-medium ${g3 === true ? 'text-accent-green' : g3 === false ? 'text-accent-red' : 'text-muted'}`}>
-                              {g3 === true ? (
-                                <span>✅ {d.historical ? `ROI=${d.historical.roi >= 0 ? '+' : ''}${d.historical.roi.toFixed(0)}%` : 'PASS'}</span>
-                              ) : g3 === false ? (
-                                <span>❌ {d.historical ? `ROI=${d.historical.roi.toFixed(0)}%` : 'FAIL'}</span>
-                              ) : '· (N/A)'}
-                            </td>
-                            <td className="text-center">
-                              <DecisionBadge decision={d.decision} confidence={d.confidence} />
-                            </td>
-                            <td className={`text-right num-mono text-xs ${d.kellyPct > 0 ? 'text-accent-green' : 'text-muted'}`}>
-                              {d.kellyPct > 0 ? `${d.kellyPct.toFixed(2)}%` : '-'}
-                            </td>
+                    {/* Decision matrix table */}
+                    <div className="overflow-x-auto scroll-hint">
+                      <table className="terminal-grid w-full min-w-[400px]">
+                        <thead>
+                          <tr>
+                            <th className="text-left">Market</th>
+                            <th className="text-right num-mono">Edge %</th>
+                            <th className="text-center num-mono">G1 (Edge)</th>
+                            <th className="text-center num-mono">G2 (Consensus)</th>
+                            <th className="text-center num-mono">G3 (History)</th>
+                            <th className="text-center">Decision</th>
+                            <th className="text-right num-mono">Kelly</th>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                        </thead>
+                        <tbody>
+                          {ev.decisions.map((d, i) => {
+                            const g1 = d.gates.gate1;
+                            const g2 = d.gates.gate2;
+                            const g3 = d.gates.gate3;
+                            return (
+                              <tr key={i}>
+                                <td className="text-left text-xs text-white/80">
+                                  <div>{d.market}</div>
+                                  {d.reason && (
+                                    <div className="text-[0.55rem] text-muted/65 mt-0.5 max-w-[200px] truncate" title={d.reason}>
+                                      {d.reason}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className={`text-right num-mono text-xs ${d.edge > 20 ? 'text-accent-green font-bold' : d.edge >= 5 ? 'text-green-400' : d.edge >= -5 ? 'text-muted' : 'text-accent-red'}`}>
+                                  {d.edge > 0 ? '+' : ''}{d.edge.toFixed(1)}%
+                                </td>
+                                <td className={`text-center text-[0.6rem] font-medium ${g1 === true ? 'text-accent-green' : g1 === false ? 'text-accent-red' : 'text-muted'}`}>
+                                  {g1 === true ? '✅ PASS' : g1 === false ? '❌ FAIL' : '·'}
+                                </td>
+                                <td className={`text-center text-[0.6rem] font-medium ${g2 === true ? 'text-accent-green' : g2 === false ? 'text-accent-red' : 'text-muted'}`}>
+                                  {g2 === true ? (
+                                    <span>✅ {d.consensus ? `σ=${d.consensus.stdDevPct.toFixed(1)}%` : 'PASS'}</span>
+                                  ) : g2 === false ? (
+                                    <span>❌ {d.consensus ? `σ=${d.consensus.stdDevPct.toFixed(1)}%` : 'FAIL'}</span>
+                                  ) : '·'}
+                                </td>
+                                <td className={`text-center text-[0.6rem] font-medium ${g3 === true ? 'text-accent-green' : g3 === false ? 'text-accent-red' : 'text-muted'}`}>
+                                  {g3 === true ? (
+                                    <span>✅ {d.historical ? `ROI=${d.historical.roi >= 0 ? '+' : ''}${d.historical.roi.toFixed(0)}%` : 'PASS'}</span>
+                                  ) : g3 === false ? (
+                                    <span>❌ {d.historical ? `ROI=${d.historical.roi.toFixed(0)}%` : 'FAIL'}</span>
+                                  ) : '· (N/A)'}
+                                </td>
+                                <td className="text-center">
+                                  <DecisionBadge decision={d.decision} confidence={d.confidence} />
+                                </td>
+                                <td className={`text-right num-mono text-xs ${d.kellyPct > 0 ? 'text-accent-green' : 'text-muted'}`}>
+                                  {d.kellyPct > 0 ? `${d.kellyPct.toFixed(2)}%` : '-'}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
 
-                {ev.summary.topPick && (
-                  <div className="mt-2 text-[0.6rem] text-accent-green">
-                    ⭐ Top pick: <span className="font-bold">{ev.summary.topPick.market}</span> @ edge {ev.summary.topPick.edge > 0 ? '+' : ''}{ev.summary.topPick.edge.toFixed(1)}% · confidence {ev.summary.topPick.confidence}
+                    {ev.summary.topPick && (
+                      <div className="mt-2 text-[0.6rem] text-accent-green">
+                        ⭐ Top pick: <span className="font-bold">{ev.summary.topPick.market}</span> @ edge {ev.summary.topPick.edge > 0 ? '+' : ''}{ev.summary.topPick.edge.toFixed(1)}% · confidence {ev.summary.topPick.confidence}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
 
         {matches.length > 0 && systemBets.length === 0 && (
           <div className="card text-center text-[0.65rem] text-muted">
