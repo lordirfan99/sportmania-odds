@@ -101,13 +101,11 @@ export default function MatchDetail() {
 
       {/* ---- 1. Asian Handicap Odds (Kau bet kat sini) ---- */}
       <div className="mb-4 sm:mb-6">
-        <h2 className="section-header">1. 12SPORT MY — Asian Handicap Odds</h2>
+        <h2 className="section-header">1. 1xBet Malaysia — Asian Handicap Odds</h2>
 
         {/* AH odds — 2-column: home -0.5 | away +0.5 */}
         <div className="card mb-3">
-          <div className="text-[0.55rem] sm:text-[0.6rem] text-accent-green mb-3 uppercase tracking-wider font-bold">
-            ⚡ 12play.my — Your Betting Odds
-          </div>
+          <div className="text-[0.55rem] sm:text-[0.6rem] text-accent-green mb-3 uppercase tracking-wider font-bold">⚡ 1xBet Malaysia — Best Odds</div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3 text-center">
             <div className="bg-dark-800 rounded-lg p-2.5 sm:p-3 border border-dark-600">
               <div className="text-[0.5rem] sm:text-[0.55rem] text-muted uppercase truncate mb-1">{home_team} -0.5</div>
@@ -140,15 +138,15 @@ export default function MatchDetail() {
         {/* Edge Analysis — Now only AH + O/U markets */}
         <div className="card">
           <div className="text-[0.55rem] sm:text-[0.6rem] text-muted mb-3 uppercase tracking-wider">
-            📊 Edge Analysis — AH &amp; O/U (12SPORT vs Polymarket)
+            📊 Edge Analysis — AH &amp; O/U (1xBet vs Betfair)
           </div>
           <div className="overflow-x-auto scroll-hint">
             <table className="terminal-grid w-full min-w-[450px]">
               <thead>
                 <tr>
                   <th className="text-left">Market</th>
-                  <th className="text-right num-mono">12SPORT Implied</th>
-                  <th className="text-right num-mono">Polymarket DV</th>
+                  <th className="text-right num-mono">1xBet Implied</th>
+                  <th className="text-right num-mono">True Price</th>
                   <th className="text-right num-mono">Edge %</th>
                   <th className="text-center">Call</th>
                 </tr>
@@ -234,7 +232,7 @@ export default function MatchDetail() {
             </table>
           </div>
           <div className="mt-2 text-[0.55rem] text-muted text-center">
-            Polymarket = zero-vig crowd consensus &middot; 12SPORT = real odds you bet at 12play.my
+            Betfair Exchange = back/lay midpoint (true price) · 1xBet = odds you bet
           </div>
         </div>
       </div>
@@ -335,11 +333,10 @@ export default function MatchDetail() {
           />
         </div>
         <div className="mt-2 text-[0.5rem] text-muted text-center px-2">
-          <span className="text-accent-cyan">1xBet Devigged</span> = zero-vig implied probs from primary bookie &nbsp;·&nbsp;
-          <span className="text-accent-yellow">Dixon-Coles</span> = Poisson goal model (real statistical model) &nbsp;·&nbsp;
-          <span className="text-purple-400">Pinnacle</span> = world's sharpest bookmaker devigged &nbsp;·&nbsp;
-          <span className="text-green-400">Polymarket</span> = prediction market (when available) &nbsp;·&nbsp;
-          <span className="text-white">ENSEMBLE</span> = average of all available sources
+                  <span className="text-accent-cyan">1xBet Devigged</span> = zero-vig implied probs from primary bookie &nbsp;·&nbsp;
+                  <span className="text-accent-yellow">Dixon-Coles</span> = Poisson goal model (real statistical model) &nbsp;·&nbsp;
+                  <span className="text-purple-400">Betfair Exchange</span> = back/lay midpoint (true price) &nbsp;·&nbsp;
+                  <span className="text-white">ENSEMBLE</span> = average of all available sources
         </div>
       </div>
 

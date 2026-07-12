@@ -140,6 +140,7 @@ export default function Dashboard() {
   const [bankrollAction, setBankrollAction] = useState('deposit');
   const [partyMode, setPartyMode] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [activeLeague, setActiveLeague] = useState('all');
   const navigate = useNavigate();
 
   // ── Load data.json + stored bets ──
@@ -212,9 +213,6 @@ export default function Dashboard() {
   // mergedBets + liveStatus already loaded from persistent store in useEffect
   const allBets = mergedBets;
 
-  // ── League filter state ──
-  const [activeLeague, setActiveLeague] = useState('all');
-  
   // Extract unique leagues
   const leagues = [...new Set(allMatches.map(m => m.league_name || m.stage || 'Other'))].sort();
 
@@ -424,25 +422,7 @@ export default function Dashboard() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <BrainCircuit className="w-4 h-5 text-accent-cyan" />
-          <h2 className="section-header mb-0">System Says — Shadow Simulation</h2>
-        </div>
-
-        <div className="card bg-dark-800/40 border border-dark-600/50 p-4 mb-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-accent-cyan font-bold uppercase tracking-wider text-[0.65rem]">
-            🔍 How to read this dashboard:
-          </div>
-          <div className="text-muted leading-relaxed text-[0.62rem] space-y-1.5">
-            <p>
-              This engine uses multi-model triangulation to cross-reference betting odds from the-odds-api (Pinnacle, Matchbook) and 1xBet against 6 analytics models.
-            </p>
-            <p>
-              Every market is filtered through 3 verification gates: 
-              <span className="text-white"> G1 (Edge ≥ 3.2%)</span>, 
-              <span className="text-white"> G2 (Model consensus deviation ≤ 10%)</span>, and 
-              <span className="text-white"> G3 (Positive historical ROI)</span>. 
-              If any gate fails, the recommendation is <strong className="text-accent-red">SKIP</strong>. Click the <span className="text-accent-cyan font-bold cursor-pointer" onClick={() => setShowHelp(true)}>❓ GUIDE</span> button in the header for a detailed breakdown.
-            </p>
-          </div>
+          <h2 className="section-header mb-0">Shadow Simulation</h2>
         </div>
 
         {/* ── League Sections ── */}
@@ -475,71 +455,36 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    {/* Decision matrix table */}
-                    <div className="overflow-x-auto scroll-hint">
-                      <table className="terminal-grid w-full min-w-[400px]">
-                        <thead>
-                          <tr>
-                            <th className="text-left">Market</th>
-                            <th className="text-right num-mono">Edge %</th>
-                            <th className="text-center num-mono">G1 (Edge)</th>
-                            <th className="text-center num-mono">G2 (Consensus)</th>
-                            <th className="text-center num-mono">G3 (History)</th>
-                            <th className="text-center">Decision</th>
-                            <th className="text-right num-mono">Kelly</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {ev.decisions.map((d, i) => {
-                            const g1 = d.gates.gate1;
-                            const g2 = d.gates.gate2;
-                            const g3 = d.gates.gate3;
-                            return (
-                              <tr key={i}>
-                                <td className="text-left text-xs text-white/80">
-                                  <div>{d.market}</div>
-                                  {d.reason && (
-                                    <div className="text-[0.55rem] text-muted/65 mt-0.5 max-w-[200px] truncate" title={d.reason}>
-                                      {d.reason}
-                                    </div>
-                                  )}
-                                </td>
-                                <td className={`text-right num-mono text-xs ${d.edge > 20 ? 'text-accent-green font-bold' : d.edge >= 5 ? 'text-green-400' : d.edge >= -5 ? 'text-muted' : 'text-accent-red'}`}>
-                                  {d.edge > 0 ? '+' : ''}{d.edge.toFixed(1)}%
-                                </td>
-                                <td className={`text-center text-[0.6rem] font-medium ${g1 === true ? 'text-accent-green' : g1 === false ? 'text-accent-red' : 'text-muted'}`}>
-                                  {g1 === true ? '✅ PASS' : g1 === false ? '❌ FAIL' : '·'}
-                                </td>
-                                <td className={`text-center text-[0.6rem] font-medium ${g2 === true ? 'text-accent-green' : g2 === false ? 'text-accent-red' : 'text-muted'}`}>
-                                  {g2 === true ? (
-                                    <span>✅ {d.consensus ? `σ=${d.consensus.stdDevPct.toFixed(1)}%` : 'PASS'}</span>
-                                  ) : g2 === false ? (
-                                    <span>❌ {d.consensus ? `σ=${d.consensus.stdDevPct.toFixed(1)}%` : 'FAIL'}</span>
-                                  ) : '·'}
-                                </td>
-                                <td className={`text-center text-[0.6rem] font-medium ${g3 === true ? 'text-accent-green' : g3 === false ? 'text-accent-red' : 'text-muted'}`}>
-                                  {g3 === true ? (
-                                    <span>✅ {d.historical ? `ROI=${d.historical.roi >= 0 ? '+' : ''}${d.historical.roi.toFixed(0)}%` : 'PASS'}</span>
-                                  ) : g3 === false ? (
-                                    <span>❌ {d.historical ? `ROI=${d.historical.roi.toFixed(0)}%` : 'FAIL'}</span>
-                                  ) : '· (N/A)'}
-                                </td>
-                                <td className="text-center">
-                                  <DecisionBadge decision={d.decision} confidence={d.confidence} />
-                                </td>
-                                <td className={`text-right num-mono text-xs ${d.kellyPct > 0 ? 'text-accent-green' : 'text-muted'}`}>
-                                  {d.kellyPct > 0 ? `${d.kellyPct.toFixed(2)}%` : '-'}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                    {/* Odds comparison: simple 3-col grid */}
+                    <div className="overflow-x-auto scroll-hint -mx-2 px-2">
+                      <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-2 gap-y-1 text-[0.55rem] min-w-[280px]">
+                        <div className="text-muted text-left">Market</div>
+                        <div className="text-right text-accent-cyan font-bold">1xBet</div>
+                        <div className="text-right text-purple-400 font-bold">Betfair</div>
+                        <div className="text-right font-bold text-muted">Edge</div>
+                        {ev.decisions.filter(d => d.market?.includes('(1xBet vs Betfair)') || d.market?.includes('(1xBet vs Pinnacle)')).map((d, i) => {
+                          const label = d.market.replace(/\s*\(1xBet vs (Betfair|Pinnacle)\)/, '');
+                          const xb = d.xbet_price || d.xbetPrice || null;
+                          const bf = d.betfair_price || d.pinnacle_price || d.betfairPrice || null;
+                          const ec = d.edge > 5 ? 'text-accent-green' : d.edge > -5 ? 'text-muted' : 'text-accent-red';
+                          return (
+                            <div key={i} className="contents">
+                              <div className="text-white/80 truncate">{label}</div>
+                              <div className="text-right text-accent-cyan">{xb?.toFixed(2) ?? '-'}</div>
+                              <div className="text-right text-purple-400">{bf?.toFixed(2) ?? '-'}</div>
+                              <div className={`text-right ${ec}`}>{d.edge > 0 ? '+' : ''}{d.edge.toFixed(1)}%</div>
+                            </div>
+                          );
+                        })}
+                        {(!ev.decisions.some(d => d.market?.includes('(1xBet vs Betfair)') || d.market?.includes('(1xBet vs Pinnacle)'))) && (
+                          <div className="col-span-4 text-center text-muted py-1 text-[0.5rem]">No Betfair data</div>
+                        )}
+                      </div>
                     </div>
 
                     {ev.summary.topPick && (
-                      <div className="mt-2 text-[0.6rem] text-accent-green">
-                        ⭐ Top pick: <span className="font-bold">{ev.summary.topPick.market}</span> @ edge {ev.summary.topPick.edge > 0 ? '+' : ''}{ev.summary.topPick.edge.toFixed(1)}% · confidence {ev.summary.topPick.confidence}
+                      <div className="mt-1 text-[0.5rem] text-accent-green font-bold">
+                        ⭐ {ev.summary.topPick.market.replace(/\s*\(1xBet vs (Betfair|Pinnacle)\)/, '')} @ {ev.summary.topPick.edge > 0 ? '+' : ''}{ev.summary.topPick.edge.toFixed(1)}%
                       </div>
                     )}
                   </div>

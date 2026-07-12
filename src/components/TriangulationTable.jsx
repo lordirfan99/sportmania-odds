@@ -2,18 +2,16 @@ export default function TriangulationTable({ title, sources, headers, decimals =
   const colorMap = {
     'market_devig': 'text-accent-cyan',
     'dixon_coles':  'text-accent-yellow',
-    'pinnacle':     'text-purple-400',
-    'polymarket':   'text-green-400',
-    'dataset':      'text-blue-400',    // legacy fallback
-    'opta':         'text-purple-400',  // legacy fallback
-    'xgscore':      'text-accent-yellow', // legacy fallback
+    'betfair':      'text-purple-400',
+    'dataset':      'text-blue-400',
+    'opta':         'text-purple-400',
+    'xgscore':      'text-accent-yellow',
     'ensemble':     'text-white font-bold',
   };
   const labelMap = {
     'market_devig': '1xBet Devigged',
     'dixon_coles':  'Dixon-Coles (Poisson)',
-    'pinnacle':     'Pinnacle (Sharp)',
-    'polymarket':   'Polymarket',
+    'betfair':      'Betfair Exchange',
     'dataset':      'Dataset 49K',
     'opta':         'Opta Analyst',
     'xgscore':      'xGscore',
@@ -31,7 +29,7 @@ export default function TriangulationTable({ title, sources, headers, decimals =
           </tr>
         </thead>
         <tbody>
-          {Object.entries(sources).map(([key, vals]) => (
+          {sources ? Object.entries(sources).map(([key, vals]) => (
             <tr key={key}>
               <td className={`text-left text-xs ${colorMap[key] || 'text-muted'}`}>
                 {labelMap[key] || key}
@@ -42,7 +40,13 @@ export default function TriangulationTable({ title, sources, headers, decimals =
                 </td>
               ))}
             </tr>
-          ))}
+          )) : (
+            <tr>
+              <td colSpan={headers.length + 1} className="text-center text-muted text-xs py-3">
+                No data available
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

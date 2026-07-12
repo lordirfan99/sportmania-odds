@@ -143,10 +143,11 @@ def _parse_api_match(m, league_key, league_name):
     if not match_id or not home_team or not away_team:
         return None
 
-    # Find Pinnacle odds for "true price"
+    # Find Pinnacle odds for "true price" AND 1xBet odds for sportsbook
     pinnacle_h2h = None
     pinnacle_spread = None
     pinnacle_totals = None
+    xbet_h2h = None
     bookies = []
 
     for bm in m.get("bookmakers", []):
@@ -166,6 +167,14 @@ def _parse_api_match(m, league_key, league_name):
 
                 if bm_key == "pinnacle":
                     pinnacle_h2h = {"home": h_odds, "draw": d_odds, "away": a_odds, "source": "Pinnacle"}
+                elif bm_key == "1xbet":
+                    xbet_h2h = {"home": h_odds, "draw": d_odds, "away": a_odds, "source": "1xBet"}
+                # Also catch "one_x_bet" and similar variant keys
+                elif bm_key in ("one_x_bet", "1xbet"):
+                    xbet_h2h = {"home": h_odds, "draw": d_odds, "away": a_odds, "source": "1xBet"}
+                # Match by title too
+                if bm_title and ("1xBet" in bm_title or "1XBet" in bm_title):
+                    xbet_h2h = {"home": h_odds, "draw": d_odds, "away": a_odds, "source": "1xBet Malaysia"}
 
             elif market_key == "spreads" and len(outcomes) >= 2:
                 if bm_key == "pinnacle":
@@ -271,6 +280,8 @@ def _parse_api_match(m, league_key, league_name):
         "analysis": {
             "sport_raw": sport_raw,
             "polymarket_devig": polymarket_devig,
+            "pinnacle_odds": pinnacle_h2h,
+            "xbet_odds": xbet_h2h,
             "ah_analysis": {
                 "home_minus_05_prob": ah_home_prob,
                 "away_plus_05_prob": ah_away_prob,
@@ -418,8 +429,32 @@ def compute_edges(matches, raw_api_data=None):
         analysis = m.get("analysis", {})
         sr = analysis.get("sport_raw", {})
         pd = analysis.get("polymarket_devig", {})
+        pin = analysis.get("pinnacle_odds", {})
+        xb = analysis.get("xbet_odds", {})
 
         edges = []
+
+        # ── 1xBet vs Pinnacle comparison (direct odds comparison for +EV) ──
+        if xb and pin:
+            xbet_odds_map = {"home": xb.get("home", 0), "draw": xb.get("draw", 0), "away": xb.get("away", 0)}
+            pinn_odds_map = {"home": pin.get("home", 0), "draw": pin.get("draw", 0), "away": pin.get("away", 0)}
+            
+            for outcome, label in [("home", m["home_team"]), ("draw", "Draw"), ("away", m["away_team"])]:
+                x_o = xbet_odds_map.get(outcome, 0)
+                p_o = pinn_odds_map.get(outcome, 0)
+                if x_o > 0 and p_o > 0:
+                    # +EV = (1xBet odds - Pinnacle odds) / Pinnacle odds * 100
+                    # If 1xBet pays more, it's +EV
+                    ev = (x_o - p_o) / p_o * 100
+                    edges.append({
+                        "market": f"{label} (1xBet vs Pinnacle)",
+                        "edge": round(ev, 1),
+                        "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                        "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                        "xbet_price": x_o,
+                        "pinnacle_price": p_o,
+                        "type": "xbet_vs_pinnacle",
+                    })
 
         # Asian Handicap edge
         home_odds = sr.get("home", 0)

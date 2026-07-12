@@ -162,7 +162,7 @@ export default function BetLogForm({ match, onClose, onLogged }) {
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               className="w-full bg-dark-900 border border-dark-500 rounded px-3 py-2.5 sm:py-2 text-xs text-white focus:border-accent-cyan outline-none mobile-touch"
-              placeholder="Manual bet via 12play"
+              placeholder="Manual bet via 1xBet"
             />
           </div>
 
