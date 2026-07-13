@@ -181,6 +181,8 @@ BOOKMAKERS = "Betfair Exchange,1xbet"
 
 _league_cache = None
 _league_cache_time = 0
+_events_cache = []
+_events_cache_time = 0
 
 
 def _get(session, path, params=None):
@@ -212,24 +214,39 @@ def list_leagues(session=None):
 
 
 def get_upcoming_events(session, max_per_league=5):
-    """Get upcoming football events with odds from Betfair Exchange and 1xBet."""
+    """Get upcoming football events with odds from Betfair Exchange and 1xBet.
+    Uses cache to avoid repeated API calls. Only re-fetches every 60 seconds.
+    """
     from datetime import timedelta
 
+    global _events_cache, _events_cache_time
     now = datetime.now(timezone.utc)
-    from_dt = now.strftime("%Y-%m-%dT%H:%M:%SZ")
-    to_dt = (now + timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    # Get events for football
+    # Return cached events if fresh (< 60s old) and not empty
+    if _events_cache and _events_cache_time and (now - _events_cache_time).total_seconds() < 60:
+        print(f"[ODDSAPI] Using cached events ({len(_events_cache)} events, {int((now - _events_cache_time).total_seconds())}s old)")
+        return _events_cache
+
+    from_dt = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    to_dt = (now + timedelta(hours=48)).strftime("%Y-%m-%dT%H:%M:%SZ")  # 48h window
+
+    # Get events for football — small limit for quota efficiency
     events = _get(session, "/events", {
         "sport": "football",
         "from": from_dt,
         "to": to_dt,
-        "limit": 200,
+        "limit": 50,  # enough for tracked leagues
     })
     if not events:
+        # Fall back to cache even if stale
+        if _events_cache:
+            print(f"[ODDSAPI] Events API failed, using cached events ({len(_events_cache)})")
+            return _events_cache
         return []
 
     # Filter for pending/live events from tracked leagues
+    # Exclude women's leagues and club friendlies
+    exclude_patterns = ["women", "friendly", "club friendly"]
     league_slugs = set(TRACKED_LEAGUES)
     filtered = []
     for e in events:
@@ -237,11 +254,22 @@ def get_upcoming_events(session, max_per_league=5):
         if status not in ("pending", "live"):
             continue
         league = e.get("league", {})
+        league_name = league.get("name", "") if isinstance(league, dict) else ""
         league_slug = league.get("slug", "") if isinstance(league, dict) else ""
+        # Skip women's leagues and club friendlies
+        if any(p in league_name.lower() for p in exclude_patterns):
+            continue
+        if any(p in league_slug.lower() for p in exclude_patterns):
+            continue
         if any(t in league_slug for t in TRACKED_LEAGUES):
             filtered.append(e)
         elif not league_slug:
             filtered.append(e)  # include if no league info
+
+    # Update cache
+    _events_cache = filtered
+    _events_cache_time = datetime.now(timezone.utc)
+    print(f"[ODDSAPI] Events cache updated ({len(filtered)} events)")
 
     return filtered[:100]
 
@@ -339,7 +367,7 @@ def extract_1xbet_odds(odds_data):
 
 
 def extract_totals(odds_data, bookmaker="Betfair Exchange"):
-    """Extract Over/Under odds from a bookmaker."""
+    """Extract Over/Under 2.5 odds from a bookmaker. Only returns the 2.5 line."""
     bms = odds_data.get("bookmakers", {})
     bm = bms.get(bookmaker, [])
     if not bm:
@@ -348,6 +376,18 @@ def extract_totals(odds_data, bookmaker="Betfair Exchange"):
     for m in bm:
         if m.get("name") == "Totals":
             odds_list = m.get("odds", [])
+            # Find the 2.5 line specifically
+            for o in odds_list:
+                point = float(o.get("hdp", 0))
+                if abs(point - 2.5) < 0.01:
+                    return {
+                        "point": 2.5,
+                        "over": float(o.get("over", 0)),
+                        "under": float(o.get("under", 0)),
+                        "lay_over": float(o.get("layOver", 0)),
+                        "lay_under": float(o.get("layUnder", 0)),
+                    }
+            # Fallback: if no 2.5 line, return the first line (data may be sparse)
             if odds_list:
                 o = odds_list[0]
                 return {
@@ -389,7 +429,8 @@ def scrape_all(session=None):
 
         bf_mid = extract_betfair_midpoint(odds_data)
         xb_odds = extract_1xbet_odds(odds_data)
-        totals = extract_totals(odds_data)
+        bf_totals = extract_totals(odds_data)  # Betfair Exchange O/U
+        xb_totals = extract_totals(odds_data, bookmaker="1xbet")  # 1xbet O/U
 
         if not bf_mid and not xb_odds:
             continue
@@ -421,12 +462,14 @@ def scrape_all(session=None):
                     "away": xb_odds["away"] if xb_odds else 0,
                     "vig": 0,
                     "source": xb_odds["source"] if xb_odds else "Betfair Exchange",
-                    "over_odds": totals["over"] if totals else 0,
-                    "under_odds": totals["under"] if totals else 0,
-                    "ou_point": totals["point"] if totals else 2.5,
+                    "over_odds": xb_totals["over"] if xb_totals else (bf_totals["over"] if bf_totals else 0),
+                    "under_odds": xb_totals["under"] if xb_totals else (bf_totals["under"] if bf_totals else 0),
+                    "ou_point": xb_totals["point"] if xb_totals else (bf_totals["point"] if bf_totals else 2.5),
                 },
                 "betfair_midpoint": bf_mid,
                 "xbet_odds": xb_odds,
+                "xbet_totals": xb_totals if xb_totals else {},
+                "betfair_totals": bf_totals if bf_totals else {},
                 "ah_analysis": {},
                 "edge_summary": [],
                 "narrative": {"form": "", "injuries": "", "tactical": ""},
@@ -442,34 +485,103 @@ def compute_vig(odds_list):
     return imp if imp > 0 else 1
 
 
+def compute_ah_odds(xb, bf):
+    """Derive AH -0.5/+0.5 odds from 1X2 odds."""
+    ah = {}
+    if xb:
+        h = xb.get("home", 0)
+        d = xb.get("draw", 0)
+        a = xb.get("away", 0)
+        if h > 0:
+            ah["home"] = h
+        if d > 0 and a > 0:
+            imp_away = 1/d + 1/a
+            ah["away"] = round(1/imp_away, 4) if imp_away > 0 else 0
+        elif a > 0:
+            ah["away"] = a
+    return ah
+
+
 def compute_edges(matches):
-    """Compute 1xBet vs Betfair Exchange edges for each match."""
+    """Compute 1xBet vs Betfair Exchange edges for each match.
+
+    Markets: Over/Under 2.5, Asian Handicap -0.5/+0.5 only.
+    """
     for m in matches:
         analysis = m.get("analysis", {})
         xb = analysis.get("xbet_odds", {})
         bf = analysis.get("betfair_midpoint", {})
+        xbt = analysis.get("xbet_totals", {})
+        bft = analysis.get("betfair_totals", {})
 
         edges = []
 
+        # ── Over/Under 2.5 (1xBet vs Betfair) ──
+        if xbt and bft:
+            ou_point = xbt.get("point", 2.5) or bft.get("point", 2.5)
+            x_over = xbt.get("over", 0)
+            x_under = xbt.get("under", 0)
+            b_over = bft.get("over", 0)
+            b_under = bft.get("under", 0)
+
+            if x_over > 0 and b_over > 0:
+                ev = (x_over - b_over) / b_over * 100
+                edges.append({
+                    "market": f"Over {ou_point} (1xBet vs Betfair)",
+                    "edge": round(ev, 1),
+                    "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                    "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                    "xbet_price": x_over,
+                    "betfair_price": b_over,
+                    "type": "xbet_vs_betfair",
+                })
+
+            if x_under > 0 and b_under > 0:
+                ev = (x_under - b_under) / b_under * 100
+                edges.append({
+                    "market": f"Under {ou_point} (1xBet vs Betfair)",
+                    "edge": round(ev, 1),
+                    "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                    "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                    "xbet_price": x_under,
+                    "betfair_price": b_under,
+                    "type": "xbet_vs_betfair",
+                })
+
+        # ── Asian Handicap -0.5/+0.5 (1xBet vs Betfair) ──
         if xb and bf:
-            for outcome, label, x_key, b_key in [
-                ("home", m["home_team"], "home", "home"),
-                ("draw", "Draw", "draw", "draw"),
-                ("away", m["away_team"], "away", "away"),
-            ]:
-                x_o = xb.get(x_key, 0)
-                b_o = bf.get(b_key, 0)
-                if x_o > 0 and b_o > 0:
-                    ev = (x_o - b_o) / b_o * 100
-                    edges.append({
-                        "market": f"{label} (1xBet vs Betfair)",
-                        "edge": round(ev, 1),
-                        "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                        "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
-                        "xbet_price": x_o,
-                        "betfair_price": b_o,
-                        "type": "xbet_vs_betfair",
-                    })
+            xb_ah = compute_ah_odds(xb, None)
+            bf_ah = compute_ah_odds(bf, None)
+
+            # Home -0.5 AH
+            x_h = xb_ah.get("home", 0)
+            b_h = bf_ah.get("home", 0)
+            if x_h > 0 and b_h > 0:
+                ev = (x_h - b_h) / b_h * 100
+                edges.append({
+                    "market": f"{m['home_team']} -0.5 (AH) (1xBet vs Betfair)",
+                    "edge": round(ev, 1),
+                    "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                    "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                    "xbet_price": x_h,
+                    "betfair_price": b_h,
+                    "type": "xbet_vs_betfair",
+                })
+
+            # Away +0.5 AH
+            x_a = xb_ah.get("away", 0)
+            b_a = bf_ah.get("away", 0)
+            if x_a > 0 and b_a > 0:
+                ev = (x_a - b_a) / b_a * 100
+                edges.append({
+                    "market": f"{m['away_team']} +0.5 (AH) (1xBet vs Betfair)",
+                    "edge": round(ev, 1),
+                    "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                    "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                    "xbet_price": x_a,
+                    "betfair_price": b_a,
+                    "type": "xbet_vs_betfair",
+                })
 
         analysis["edge_summary"] = edges
         if edges:
@@ -500,8 +612,19 @@ if __name__ == "__main__":
             best = max(edges, key=lambda e: e["edge"])
             print(f"    Best edge: {best['market']} = {best['edge']:+.1f}%")
 
-    # Save sample
-    Path("/c/Users/irfan/betting-dashboard/pipeline/_oddsapi_sample.json").write_text(
-        json.dumps(matches, indent=2), encoding="utf-8"
-    )
-    print(f"\n📁 Sample saved to _oddsapi_sample.json")
+    # ── Write output ──
+    out_path = Path(__file__).parent / "_all_matches.json"
+    out_path.write_text(json.dumps({
+        "system_status": {
+            "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "bankroll_rm": 34.2,
+            "total_profit_rm": 0,
+            "total_bets": 0,
+            "won_bets": 0,
+            "win_rate_pct": 0,
+        },
+        "bet_history": [],
+        "matches": matches,
+    }, indent=2), encoding="utf-8")
+    print(f"\n✅ Wrote {len(matches)} matches to {out_path}")
+

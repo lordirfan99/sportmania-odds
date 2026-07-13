@@ -152,10 +152,17 @@ export default function Dashboard() {
   // Extract unique leagues
   const leagues = [...new Set(allMatches.map(m => m.league_name || m.stage || 'Other'))].sort();
 
-  // Filter upcoming matches
+  // Filter upcoming matches — exclude women's leagues and club friendlies
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const excludePatterns = ['women', 'friendly', 'club friendly'];
+  // Only show matches with both bookmakers (need 1xBet + Betfair for edge comparison)
   const matches = allMatches.filter((m) => {
+    const leagueStr = (m.league_name || m.stage || '').toLowerCase();
+    if (excludePatterns.some(p => leagueStr.includes(p))) return false;
+    // Skip matches missing either bookmaker
+    const bms = (m.bookmakers || []).map(b => b.toLowerCase());
+    if (!bms.some(b => b.includes('1xbet')) || !bms.some(b => b.includes('betfair'))) return false;
     const dateStr = m.date || (m.commence_time ? m.commence_time.slice(0,10) : '');
     if (!dateStr) return activeLeague === 'all' || (m.league_name || m.stage || 'Other') === activeLeague;
     const matchDate = new Date(dateStr + 'T23:59:59');
@@ -346,91 +353,6 @@ export default function Dashboard() {
       </div>
 
       {/* ════════════════════════════════════════ */}
-      {/* 🧠 SYSTEM SAYS — Shadow Betting Decisions */}
-      {/* ════════════════════════════════════════ */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <BrainCircuit className="w-4 h-5 text-accent-cyan" />
-          <h2 className="section-header mb-0">Shadow Simulation</h2>
-        </div>
-
-        {/* ── League Sections ── */}
-        {Object.entries(grouped).map(([league, leagueMatches]) => (
-          <div key={league} className="mb-6">
-            <div className="flex items-center gap-2 mb-3 mt-2">
-              <span className="text-[0.65rem] font-bold text-accent-cyan uppercase tracking-wider">{league}</span>
-              <span className="text-[0.5rem] text-muted">({leagueMatches.length} matches)</span>
-              <div className="flex-1 h-px bg-dark-600/50 ml-2" />
-            </div>
-            <div className="grid gap-3">
-              {leagueMatches.map((m) => {
-                const mid = m.match_id || m.id;
-                const ev = matchEvals[mid];
-                if (!ev) return null;
-                return (
-                  <div key={mid} className="card cursor-pointer hover:border-accent-cyan/20 transition-all"
-                    onClick={() => navigate(`/match/${mid}`)}>
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-white">{m.home_team}</span>
-                        <span className="text-muted text-xs">v</span>
-                        <span className="font-bold text-sm text-white">{m.away_team}</span>
-                        {m.venue && <span className="text-[0.5rem] text-muted ml-1 hidden sm:inline">· {m.venue}</span>}
-                      </div>
-                      <div className="flex gap-2 text-[0.55rem]">
-                        <span className="text-accent-green">{ev.summary.bet} BET</span>
-                        <span className="text-muted">/</span>
-                        <span className="text-accent-red">{ev.summary.skip} SKIP</span>
-                      </div>
-                    </div>
-
-                    {/* Odds comparison: simple 3-col grid */}
-                    <div className="overflow-x-auto scroll-hint -mx-2 px-2">
-                      <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-2 gap-y-1 text-[0.55rem] min-w-[280px]">
-                        <div className="text-muted text-left">Market</div>
-                        <div className="text-right text-accent-cyan font-bold">1xBet</div>
-                        <div className="text-right text-purple-400 font-bold">Betfair</div>
-                        <div className="text-right font-bold text-muted">Edge</div>
-                        {ev.decisions.filter(d => d.market?.includes('(1xBet vs Betfair)')).map((d, i) => {
-                          const label = d.market.replace(/\s*\(1xBet vs Betfair\)/, '');
-                          const xb = d.xbet_price || d.xbetPrice || null;
-                          const bf = d.betfair_price || d.betfairPrice || null;
-                          const ec = d.edge > 5 ? 'text-accent-green' : d.edge > -5 ? 'text-muted' : 'text-accent-red';
-                          return (
-                            <div key={i} className="contents">
-                              <div className="text-white/80 truncate">{label}</div>
-                              <div className="text-right text-accent-cyan">{xb?.toFixed(2) ?? '-'}</div>
-                              <div className="text-right text-purple-400">{bf?.toFixed(2) ?? '-'}</div>
-                              <div className={`text-right ${ec}`}>{d.edge > 0 ? '+' : ''}{d.edge.toFixed(1)}%</div>
-                            </div>
-                          );
-                        })}
-                        {(!ev.decisions.some(d => d.market?.includes('(1xBet vs Betfair)'))) && (
-                          <div className="col-span-4 text-center text-muted py-1 text-[0.5rem]">No Betfair data</div>
-                        )}
-                      </div>
-                    </div>
-
-                    {ev.summary.topPick && (
-                      <div className="mt-1 text-[0.5rem] text-accent-green font-bold">
-                        ⭐ {ev.summary.topPick.market.replace(/\s*\(1xBet vs (Betfair|Pinnacle)\)/, '')} @ {ev.summary.topPick.edge > 0 ? '+' : ''}{ev.summary.topPick.edge.toFixed(1)}%
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-
-        {matches.length > 0 && systemBets.length === 0 && (
-          <div className="card text-center text-[0.65rem] text-muted">
-            ⚪ No markets pass all 3 gates — system recommends PASS on all upcoming matches.
-          </div>
-        )}
-      </div>
-
-      {/* ════════════════════════════════════════ */}
       {/* 🔬 DIVERGENCE TRACKER — You vs System   */}
       {/* ════════════════════════════════════════ */}
       <div className="mb-6">
@@ -512,7 +434,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {divergedBets.map((sb, i) => {
-                    const match = matches.find((m) => m.id === sb.matchId);
+                    const match = matches.find((m) => (m.match_id || m.id) === sb.matchId);
                     return (
                       <tr key={i}>
                         <td className="text-left text-xs text-white/80">
@@ -575,7 +497,7 @@ export default function Dashboard() {
       </div>
 
       {/* ════════════════════════════════════════ */}
-      {/* UPCOMING MATCHES */}
+      {/* 📊 UPCOMING MATCHES — Odds + Edge Analysis */}
       {/* ════════════════════════════════════════ */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 className="section-header mb-0">Upcoming Matches</h2>
@@ -584,72 +506,165 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-2">
-        <div className="hidden md:grid grid-cols-[1fr_2fr_1fr_1.5fr_1fr_0.8fr] gap-2 px-4 py-2 text-[0.6rem] text-muted uppercase tracking-wider">
-          <span /><span>Match</span><span>Stage</span><span>AH -0.5/+0.5</span><span>Poly DNB</span><span>Edge</span>
-        </div>
-        {matches.map((m) => {
-          const top = bestEdge(m);
-          const ev = matchEvals[m.id];
-          const systemDecision = ev?.summary?.topPick?.decision === 'BET';
-          return (
-            <div
-              key={m.id}
-              onClick={() => navigate(`/match/${m.id}`)}
-              className="card cursor-pointer hover:border-accent-cyan/30 transition-all grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr_1.5fr_1.5fr_0.8fr] gap-2 items-center"
-            >
-              <div className="md:hidden flex items-center justify-between w-full">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-bold text-sm text-white truncate">{m.home_team}</span>
-                  <span className="text-muted text-xs shrink-0">vs</span>
-                  <span className="font-bold text-sm text-white truncate">{m.away_team}</span>
+      {Object.entries(grouped).map(([league, leagueMatches]) => {
+        const sorted = [...leagueMatches].sort((a, b) => {
+          const ea = matchEvals[a.match_id || a.id];
+          const eb = matchEvals[b.match_id || b.id];
+          const topA = ea?.summary?.topPick?.edge ?? -999;
+          const topB = eb?.summary?.topPick?.edge ?? -999;
+          return topB - topA;
+        });
+        return (
+        <div key={league} className="mb-6">
+          <div className="flex items-center gap-2 mb-3 mt-2">
+            <span className="text-[0.65rem] font-bold text-accent-cyan uppercase tracking-wider">{league}</span>
+            <span className="text-[0.5rem] text-muted">({leagueMatches.length} matches)</span>
+            <div className="flex-1 h-px bg-dark-600/50 ml-2" />
+          </div>
+          <div className="grid gap-3">
+            {sorted.map((m) => {
+              const mid = m.match_id || m.id;
+              const ev = matchEvals[mid];
+              if (!ev) return null;
+              const top = ev.summary?.topPick;
+              return (
+                <div key={mid} className="card cursor-pointer hover:border-accent-cyan/20 transition-all"
+                  onClick={() => navigate(`/match/${mid}`)}>
+                  {/* Row 1: Teams + BET/SKIP */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-bold text-sm text-white truncate">{m.home_team}</span>
+                      <span className="text-muted text-xs shrink-0">v</span>
+                      <span className="font-bold text-sm text-white truncate">{m.away_team}</span>
+                    </div>
+                    <div className="flex gap-2 text-[0.55rem] shrink-0">
+                      <span className="text-accent-green">{ev.summary.bet} BET</span>
+                      <span className="text-muted">/</span>
+                      <span className="text-accent-red">{ev.summary.skip} SKIP</span>
+                    </div>
+                  </div>
+
+                  {/* Row 2: League + Date */}
+                  <div className="text-[0.55rem] text-muted mb-2">{m.stage || m.league_name} · {m.date || '--'}</div>
+
+                  {/* Row 3: Market grid — O/U 2.5 + Asian Handicap only */}
+                  <div className="overflow-x-auto -mx-2 px-2 mb-2">
+                    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-2 gap-y-1 text-[0.55rem] min-w-[280px]">
+                      <div className="text-muted text-left font-bold uppercase tracking-wider">Market</div>
+                      <div className="text-right text-accent-cyan font-bold">1xBet</div>
+                      <div className="text-right text-purple-400 font-bold">Betfair</div>
+                      <div className="text-right font-bold text-muted">Edge</div>
+                      {(() => {
+                        const ouEdges = ev.decisions.filter(d => d.market?.startsWith('Over ') || d.market?.startsWith('Under '));
+                        const ahEdges = ev.decisions.filter(d => d.market?.includes('(AH)'));
+                        const allEdges = [...ouEdges, ...ahEdges];
+                        return allEdges.length > 0 ? allEdges.map((d, i) => {
+                          const label = d.market.replace(/\s*\(1xBet vs Betfair\)/, '');
+                          const xb = d.xbet_price || d.xbetPrice || null;
+                          const bf = d.betfair_price || d.betfairPrice || null;
+                          const ec = d.edge > 5 ? 'text-accent-green' : d.edge > -5 ? 'text-muted' : 'text-accent-red';
+                          return (
+                            <div key={i} className="contents">
+                              <div className={`text-white/80 truncate ${d.market?.startsWith('Over') || d.market?.startsWith('Under') ? 'font-bold' : ''}`}>{label}</div>
+                              <div className="text-right text-accent-cyan num-mono">{xb?.toFixed(2) ?? '-'}</div>
+                              <div className="text-right text-purple-400 num-mono">{bf?.toFixed(2) ?? '-'}</div>
+                              <div className={`text-right num-mono ${ec}`}>{d.edge > 0 ? '+' : ''}{d.edge.toFixed(1)}%</div>
+                            </div>
+                          );
+                        }) : (
+                          <div className="col-span-4 text-center text-muted py-1 text-[0.5rem]">No Betfair data</div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Row 4: Summary bar — O/U spread + EdgeBadge */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 mt-1">
+                    <div className="text-[0.55rem] text-muted">
+                      O/U {m.analysis?.sport_raw?.ou_point?.toFixed(1) || '2.5'}:{' '}
+                      <span className="num-mono text-white/70">{m.analysis?.sport_raw?.over_odds?.toFixed(2) ?? '-'}</span>
+                      <span className="text-muted"> / </span>
+                      <span className="num-mono text-white/70">{m.analysis?.sport_raw?.under_odds?.toFixed(2) ?? '-'}</span>
+                      <span className="ml-2">AH:</span>
+                      <span className="num-mono text-white/70 ml-1">{m.home_odds?.toFixed(2) ?? '-'}</span>
+                      <span className="text-muted"> / </span>
+                      <span className="num-mono text-white/70">{m.away_odds?.toFixed(2) ?? '-'}</span>
+                    </div>
+                    <EdgeBadge edge={top?.edge ?? null} />
+                  </div>
+
+                  {/* Row 5: Top pick recommendation */}
+                  {top && (
+                    <div className="mt-1 text-[0.5rem] text-accent-green font-bold">
+                      ⭐ {top.market.replace(/\s*\(1xBet vs (Betfair|Pinnacle)\)/, '')} @ {top.edge > 0 ? '+' : ''}{top.edge.toFixed(1)}%
+                    </div>
+                  )}
                 </div>
-                <EdgeBadge edge={top?.edge ?? null} />
-              </div>
-              <div className="hidden md:block">
-                {systemDecision && <span className="edge-positive-pulse inline-block w-2 h-2 rounded-full bg-accent-green" title="System says BET" />}
-                {!systemDecision && top && top.edge > 20 && <span className="edge-positive-pulse inline-block w-2 h-2 rounded-full bg-accent-green" />}
-                {!systemDecision && top && top.edge >= 5 && top.edge <= 20 && <span className="inline-block w-2 h-2 rounded-full bg-green-500" />}
-                {!systemDecision && top && top.edge >= -5 && top.edge < 5 && <span className="inline-block w-2 h-2 rounded-full bg-accent-gray" />}
-                {!systemDecision && top && top.edge < -5 && <span className="inline-block w-2 h-2 rounded-full bg-accent-red" />}
-                {!top && <span className="inline-block w-2 h-2 rounded-full bg-accent-gray" />}
-              </div>
-              <div className="hidden md:flex items-center gap-2">
-                <span className="font-bold text-white">{m.home_team}</span>
-                <span className="text-muted text-xs">v</span>
-                <span className="font-bold text-white">{m.away_team}</span>
-                {systemDecision && <span className="text-[0.5rem] text-accent-green font-bold ml-1">🤖</span>}
-              </div>
-              <div className="hidden md:text-sm text-muted md:block">{m.stage}</div>
-              <div className="hidden md:flex gap-2 text-xs num-mono">
-                <span className="text-white/90">{m.home_odds?.toFixed(2)}</span>
-                <span className="text-muted">|</span>
-                <span className="text-white/90">{m.away_odds?.toFixed(2)}</span>
-              </div>
-              <div className="hidden md:flex gap-2 text-xs num-mono">
-                <span className="text-accent-green">{m.analysis?.ah_analysis?.home_0_prob?.toFixed(0) || '-'}%</span>
-                <span className="text-muted">|</span>
-                <span className="text-accent-red">{m.analysis?.ah_analysis?.away_0_prob?.toFixed(0) || '-'}%</span>
-              </div>
-              <div className="hidden md:block">
-                <EdgeBadge edge={top?.edge ?? null} />
-              </div>
-              <div className="md:hidden flex items-center justify-between gap-1 text-[0.55rem] text-muted mt-1">
-                <span className="truncate">{m.stage} · {m.date}</span>
-                <span className="shrink-0">AH:{' '}
-                  <span className="num-mono text-white/70">{m.home_odds?.toFixed(2)}/{m.away_odds?.toFixed(2)}</span>
-                </span>
-                <span className="shrink-0">DNB:{' '}
-                  <span className="num-mono">
-                    <span className="text-accent-green">{m.analysis?.ah_analysis?.home_0_prob?.toFixed(0) || '-'}</span>/
-                    <span className="text-accent-red">{m.analysis?.ah_analysis?.away_0_prob?.toFixed(0) || '-'}</span>
-                  </span>
-                </span>
-              </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+      })}
+
+      {matches.length > 0 && systemBets.length === 0 && (
+        <div className="card text-center text-[0.65rem] text-muted">
+          ⚪ No markets pass all 3 gates — system recommends PASS on all upcoming matches.
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════ */}
+      {/* 📊 TOTAL UNDER 2.5 MARKET — All Matches */}
+      {/* ════════════════════════════════════════ */}
+      {(() => {
+        const underEdges = [];
+        matches.forEach(m => {
+          const ev = matchEvals[m.match_id || m.id];
+          if (!ev) return;
+          ev.decisions.forEach(d => {
+            if (d.market?.startsWith('Under ') && d.market?.includes('(1xBet vs Betfair)')) {
+              underEdges.push({
+                label: d.market.replace(/\s*\(1xBet vs Betfair\)/, ''),
+                edge: d.edge,
+                xb: d.xbet_price || d.xbetPrice || null,
+                bf: d.betfair_price || d.betfairPrice || null,
+                home: m.home_team,
+                away: m.away_team,
+                league: m.stage || m.league_name || '',
+              });
+            }
+          });
+        });
+        if (underEdges.length === 0) return null;
+        underEdges.sort((a, b) => b.edge - a.edge);
+        return (
+          <div className="mb-6 mt-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="section-header mb-0">📉 Total Under Market ({underEdges.length})</span>
             </div>
-          );
-        })}
-      </div>
+            <div className="grid gap-1.5">
+              <div className="hidden sm:grid grid-cols-[1fr_2fr_auto_auto_auto] gap-2 px-3 py-1.5 text-[0.5rem] text-muted uppercase tracking-wider">
+                <span>#</span><span>Match</span><span>1xBet</span><span>Betfair</span><span>Edge</span>
+              </div>
+              {underEdges.map((u, i) => (
+                <div key={i} className="card flex flex-wrap items-center gap-x-3 gap-y-0.5 py-2 px-3">
+                  <span className="text-[0.55rem] text-muted w-4 shrink-0">{i + 1}.</span>
+                  <span className="font-bold text-sm text-white min-w-0 flex-1 truncate">{u.home} vs {u.away}</span>
+                  <span className="text-[0.5rem] text-muted w-full sm:w-auto">{u.league}</span>
+                  <div className="flex items-center gap-2 text-[0.55rem] w-full sm:w-auto sm:ml-auto">
+                    <span className="text-accent-cyan num-mono">{u.xb?.toFixed(2) ?? '-'}</span>
+                    <span className="text-muted">vs</span>
+                    <span className="text-purple-400 num-mono">{u.bf?.toFixed(2) ?? '-'}</span>
+                    <span className={`num-mono font-bold ${u.edge > 0 ? 'text-accent-green' : u.edge > -5 ? 'text-muted' : 'text-accent-red'}`}>
+                      {u.edge > 0 ? '+' : ''}{u.edge.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ════════════════════════════════════════ */}
       {/* BET HISTORY */}
