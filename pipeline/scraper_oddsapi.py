@@ -626,7 +626,7 @@ if __name__ == "__main__":
     out_path.write_text(json.dumps({
         "system_status": {
             "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "bankroll_rm": 34.2,
+            "bankroll_rm": 70.0,
             "total_profit_rm": 0,
             "total_bets": 0,
             "won_bets": 0,
