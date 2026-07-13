@@ -1,6 +1,6 @@
 {
   "system_status": {
-    "last_updated": "2026-07-13T03:55:15Z",
+    "last_updated": "2026-07-13T04:09:18Z",
     "bankroll_rm": 70.0,
     "total_profit_rm": 0,
     "total_bets": 0,
@@ -24,9 +24,9 @@
         "Betfair Exchange"
       ],
       "highest_edge_status": "\u26aa",
-      "home_odds": 1.22,
-      "draw_odds": 7.6,
-      "away_odds": 23.0,
+      "home_odds": 1.2193,
+      "draw_odds": 7.5158,
+      "away_odds": 22.3043,
       "analysis": {
         "sport_raw": {
           "home": 0,
@@ -39,15 +39,19 @@
           "ou_point": 2.5
         },
         "betfair_midpoint": {
-          "home": 1.22,
-          "draw": 7.6,
-          "away": 23.0,
+          "home": 1.2193,
+          "draw": 7.5158,
+          "away": 22.3043,
           "home_back": 1.19,
           "home_lay": 1.25,
           "draw_back": 6.8,
           "draw_lay": 8.4,
           "away_back": 19.0,
           "away_lay": 27.0,
+          "spread_home_pct": 4.03,
+          "spread_draw_pct": 2.8,
+          "spread_away_pct": 1.56,
+          "liquid": false,
           "source": "Betfair Exchange"
         },
         "xbet_odds": null,
@@ -58,7 +62,13 @@
             "over": 1.66,
             "under": 2.3,
             "lay_over": 1.77,
-            "lay_under": 2.52
+            "lay_under": 2.52,
+            "mid_over": 1.7132,
+            "mid_under": 2.405,
+            "spread_over_pct": 3.74,
+            "spread_under_pct": 3.8,
+            "liquid_over": false,
+            "liquid_under": false
           }
         ],
         "ah_analysis": {},
@@ -101,15 +111,19 @@
           "ou_point": 2.5
         },
         "betfair_midpoint": {
-          "home": 1.2650000000000001,
-          "draw": 7.300000000000001,
-          "away": 14.25,
+          "home": 1.265,
+          "draw": 7.2986,
+          "away": 14.2105,
           "home_back": 1.26,
           "home_lay": 1.27,
           "draw_back": 7.2,
           "draw_lay": 7.4,
           "away_back": 13.5,
           "away_lay": 15.0,
+          "spread_home_pct": 0.62,
+          "spread_draw_pct": 0.38,
+          "spread_away_pct": 0.74,
+          "liquid": true,
           "source": "Betfair Exchange"
         },
         "xbet_odds": {
@@ -122,38 +136,42 @@
           {
             "point": 2.5,
             "over": 1.44,
-            "under": 2.46,
-            "lay_over": 0.0,
-            "lay_under": 0.0
+            "under": 2.46
           }
         ],
         "betfair_totals": [
           {
             "point": 2.5,
-            "over": 1.5,
+            "over": 1.51,
             "under": 2.9,
             "lay_over": 1.53,
-            "lay_under": 3.0
+            "lay_under": 2.97,
+            "mid_over": 1.5199,
+            "mid_under": 2.9346,
+            "spread_over_pct": 0.87,
+            "spread_under_pct": 0.81,
+            "liquid_over": true,
+            "liquid_under": true
           }
         ],
         "ah_analysis": {},
         "edge_summary": [
           {
             "market": "Over 2.5 (1xBet vs Betfair)",
-            "edge": -5.0,
-            "status": "\u26aa",
+            "edge": -5.3,
+            "status": "\u274c",
             "quarter_kelly_stake": 0,
             "xbet_price": 1.44,
-            "betfair_price": 1.515,
+            "betfair_price": 1.5199,
             "type": "xbet_vs_betfair"
           },
           {
             "market": "Under 2.5 (1xBet vs Betfair)",
-            "edge": -16.6,
+            "edge": -16.2,
             "status": "\u274c",
             "quarter_kelly_stake": 0,
             "xbet_price": 2.46,
-            "betfair_price": 2.95,
+            "betfair_price": 2.9346,
             "type": "xbet_vs_betfair"
           },
           {
@@ -162,16 +180,16 @@
             "status": "\u26aa",
             "quarter_kelly_stake": 0,
             "xbet_price": 1.26,
-            "betfair_price": 1.2650000000000001,
+            "betfair_price": 1.265,
             "type": "xbet_vs_betfair"
           },
           {
             "market": "Halmstads BK +0.5 (AH) (1xBet vs Betfair)",
-            "edge": -26.3,
+            "edge": -26.2,
             "status": "\u274c",
             "quarter_kelly_stake": 0,
             "xbet_price": 3.557,
-            "betfair_price": 4.8271,
+            "betfair_price": 4.822,
             "type": "xbet_vs_betfair"
           }
         ],
@@ -197,7 +215,7 @@
         "1xbet",
         "Betfair Exchange"
       ],
-      "highest_edge_status": "\u274c",
+      "highest_edge_status": "\u26aa",
       "home_odds": 3.025,
       "draw_odds": 2.9,
       "away_odds": 2.5,
@@ -213,15 +231,19 @@
           "ou_point": 2.5
         },
         "betfair_midpoint": {
-          "home": 3.35,
-          "draw": 2.875,
-          "away": 2.905,
+          "home": 3.3313,
+          "draw": 2.8643,
+          "away": 2.8978,
           "home_back": 3.1,
           "home_lay": 3.6,
           "draw_back": 2.7,
           "draw_lay": 3.05,
           "away_back": 2.76,
           "away_lay": 3.05,
+          "spread_home_pct": 4.48,
+          "spread_draw_pct": 4.25,
+          "spread_away_pct": 3.44,
+          "liquid": false,
           "source": "Betfair Exchange"
         },
         "xbet_odds": {
@@ -234,59 +256,26 @@
           {
             "point": 2.5,
             "over": 2.85,
-            "under": 1.36,
-            "lay_over": 0.0,
-            "lay_under": 0.0
+            "under": 1.36
           }
         ],
         "betfair_totals": [
           {
             "point": 2.5,
-            "over": 2.96,
+            "over": 3.08,
             "under": 1.41,
             "lay_over": 3.44,
-            "lay_under": 1.51
+            "lay_under": 1.48,
+            "mid_over": 3.2501,
+            "mid_under": 1.4442,
+            "spread_over_pct": 3.4,
+            "spread_under_pct": 3.35,
+            "liquid_over": false,
+            "liquid_under": false
           }
         ],
         "ah_analysis": {},
-        "edge_summary": [
-          {
-            "market": "Over 2.5 (1xBet vs Betfair)",
-            "edge": -10.9,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 2.85,
-            "betfair_price": 3.2,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 2.5 (1xBet vs Betfair)",
-            "edge": -6.8,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.36,
-            "betfair_price": 1.46,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "CA Claypole -0.5 (AH) (1xBet vs Betfair)",
-            "edge": -9.7,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 3.025,
-            "betfair_price": 3.35,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Leones de Rosario FC +0.5 (AH) (1xBet vs Betfair)",
-            "edge": -7.1,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.3426,
-            "betfair_price": 1.445,
-            "type": "xbet_vs_betfair"
-          }
-        ],
+        "edge_summary": [],
         "narrative": {
           "form": "",
           "injuries": "",
@@ -309,7 +298,7 @@
         "1xbet",
         "Betfair Exchange"
       ],
-      "highest_edge_status": "\u274c",
+      "highest_edge_status": "\u26aa",
       "home_odds": 3.625,
       "draw_odds": 2.9,
       "away_odds": 2.2,
@@ -325,15 +314,19 @@
           "ou_point": 2.5
         },
         "betfair_midpoint": {
-          "home": 8.375,
-          "draw": 2.5700000000000003,
-          "away": 2.72,
-          "home_back": 3.25,
+          "home": 5.3036,
+          "draw": 2.5612,
+          "away": 2.4206,
+          "home_back": 3.3,
           "home_lay": 13.5,
           "draw_back": 2.42,
           "draw_lay": 2.72,
-          "away_back": 1.84,
-          "away_lay": 3.6,
+          "away_back": 1.85,
+          "away_lay": 3.5,
+          "spread_home_pct": 22.9,
+          "spread_draw_pct": 4.56,
+          "spread_away_pct": 25.48,
+          "liquid": false,
           "source": "Betfair Exchange"
         },
         "xbet_odds": {
@@ -346,9 +339,7 @@
           {
             "point": 2.5,
             "over": 2.78,
-            "under": 1.35,
-            "lay_over": 0.0,
-            "lay_under": 0.0
+            "under": 1.35
           }
         ],
         "betfair_totals": [
@@ -357,48 +348,17 @@
             "over": 2.48,
             "under": 1.24,
             "lay_over": 5.17,
-            "lay_under": 1.68
+            "lay_under": 1.68,
+            "mid_over": 3.3521,
+            "mid_under": 1.4268,
+            "spread_over_pct": 20.98,
+            "spread_under_pct": 21.12,
+            "liquid_over": false,
+            "liquid_under": false
           }
         ],
         "ah_analysis": {},
-        "edge_summary": [
-          {
-            "market": "Over 2.5 (1xBet vs Betfair)",
-            "edge": -27.3,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 2.78,
-            "betfair_price": 3.825,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 2.5 (1xBet vs Betfair)",
-            "edge": -7.5,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.35,
-            "betfair_price": 1.46,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "CA Fenix Pilar -0.5 (AH) (1xBet vs Betfair)",
-            "edge": -56.7,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 3.625,
-            "betfair_price": 8.375,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "CS Barracas +0.5 (AH) (1xBet vs Betfair)",
-            "edge": -5.3,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.251,
-            "betfair_price": 1.3214,
-            "type": "xbet_vs_betfair"
-          }
-        ],
+        "edge_summary": [],
         "narrative": {
           "form": "",
           "injuries": "",
@@ -421,9 +381,9 @@
         "Betfair Exchange"
       ],
       "highest_edge_status": "\u26aa",
-      "home_odds": 50.555,
-      "draw_odds": 251.27,
-      "away_odds": 50.555,
+      "home_odds": 2.1956,
+      "draw_odds": 5.0543,
+      "away_odds": 2.1956,
       "analysis": {
         "sport_raw": {
           "home": 0,
@@ -436,15 +396,19 @@
           "ou_point": 2.5
         },
         "betfair_midpoint": {
-          "home": 50.555,
-          "draw": 251.27,
-          "away": 50.555,
+          "home": 2.1956,
+          "draw": 5.0543,
+          "away": 2.1956,
           "home_back": 1.11,
           "home_lay": 100.0,
           "draw_back": 2.54,
           "draw_lay": 500.0,
           "away_back": 1.11,
           "away_lay": 100.0,
+          "spread_home_pct": 89.09,
+          "spread_draw_pct": 39.17,
+          "spread_away_pct": 89.09,
+          "liquid": false,
           "source": "Betfair Exchange"
         },
         "xbet_odds": null,
@@ -455,7 +419,13 @@
             "over": 1.03,
             "under": 1.26,
             "lay_over": 5.0,
-            "lay_under": 95.0
+            "lay_under": 95.0,
+            "mid_over": 1.7081,
+            "mid_under": 2.487,
+            "spread_over_pct": 77.09,
+            "spread_under_pct": 78.31,
+            "liquid_over": false,
+            "liquid_under": false
           }
         ],
         "ah_analysis": {},
@@ -482,9 +452,9 @@
         "Betfair Exchange"
       ],
       "highest_edge_status": "\u26aa",
-      "home_odds": 0.0,
-      "draw_odds": 3.9749999999999996,
-      "away_odds": 1.9100000000000001,
+      "home_odds": 0,
+      "draw_odds": 3.9775,
+      "away_odds": 1.9066,
       "analysis": {
         "sport_raw": {
           "home": 0,
@@ -497,15 +467,19 @@
           "ou_point": 2.5
         },
         "betfair_midpoint": {
-          "home": 0.0,
-          "draw": 3.9749999999999996,
-          "away": 1.9100000000000001,
+          "home": 0,
+          "draw": 3.9775,
+          "away": 1.9066,
           "home_back": 0.0,
           "home_lay": 0.0,
-          "draw_back": 3.65,
+          "draw_back": 3.7,
           "draw_lay": 4.3,
           "away_back": 1.83,
           "away_lay": 1.99,
+          "spread_home_pct": 0,
+          "spread_draw_pct": 3.77,
+          "spread_away_pct": 4.39,
+          "liquid": false,
           "source": "Betfair Exchange"
         },
         "xbet_odds": null,
@@ -516,7 +490,13 @@
             "over": 1.71,
             "under": 1.89,
             "lay_over": 2.13,
-            "lay_under": 2.4
+            "lay_under": 2.4,
+            "mid_over": 1.897,
+            "mid_under": 2.1147,
+            "spread_over_pct": 11.53,
+            "spread_under_pct": 11.24,
+            "liquid_over": false,
+            "liquid_under": false
           }
         ],
         "ah_analysis": {},
@@ -543,9 +523,9 @@
         "Betfair Exchange"
       ],
       "highest_edge_status": "\u26aa",
-      "home_odds": 1.68,
-      "draw_odds": 4.125,
-      "away_odds": 6.0,
+      "home_odds": 1.6899,
+      "draw_odds": 4.1176,
+      "away_odds": 5.9733,
       "analysis": {
         "sport_raw": {
           "home": 0,
@@ -553,20 +533,24 @@
           "away": 0,
           "vig": 0,
           "source": "Betfair Exchange",
-          "over_odds": 1.9,
-          "under_odds": 1.92,
+          "over_odds": 1.91,
+          "under_odds": 1.94,
           "ou_point": 2.5
         },
         "betfair_midpoint": {
-          "home": 1.68,
-          "draw": 4.125,
-          "away": 6.0,
-          "home_back": 1.66,
+          "home": 1.6899,
+          "draw": 4.1176,
+          "away": 5.9733,
+          "home_back": 1.68,
           "home_lay": 1.7,
           "draw_back": 3.95,
           "draw_lay": 4.3,
           "away_back": 5.6,
           "away_lay": 6.4,
+          "spread_home_pct": 0.7,
+          "spread_draw_pct": 2.06,
+          "spread_away_pct": 2.23,
+          "liquid": true,
           "source": "Betfair Exchange"
         },
         "xbet_odds": null,
@@ -574,10 +558,16 @@
         "betfair_totals": [
           {
             "point": 2.5,
-            "over": 1.9,
-            "under": 1.92,
-            "lay_over": 2.09,
-            "lay_under": 2.12
+            "over": 1.91,
+            "under": 1.94,
+            "lay_over": 2.07,
+            "lay_under": 2.1,
+            "mid_over": 1.9868,
+            "mid_under": 2.0168,
+            "spread_over_pct": 4.05,
+            "spread_under_pct": 3.93,
+            "liquid_over": false,
+            "liquid_under": false
           }
         ],
         "ah_analysis": {},
@@ -604,9 +594,9 @@
         "Betfair Exchange"
       ],
       "highest_edge_status": "\u26aa",
-      "home_odds": 3.8249999999999997,
-      "draw_odds": 3.625,
-      "away_odds": 2.19,
+      "home_odds": 3.7616,
+      "draw_odds": 3.6166,
+      "away_odds": 2.1771,
       "analysis": {
         "sport_raw": {
           "home": 0,
@@ -615,19 +605,23 @@
           "vig": 0,
           "source": "Betfair Exchange",
           "over_odds": 1.94,
-          "under_odds": 1.9,
+          "under_odds": 1.91,
           "ou_point": 2.5
         },
         "betfair_midpoint": {
-          "home": 3.8249999999999997,
-          "draw": 3.625,
-          "away": 2.19,
+          "home": 3.7616,
+          "draw": 3.6166,
+          "away": 2.1771,
           "home_back": 3.55,
-          "home_lay": 4.1,
+          "home_lay": 4.0,
           "draw_back": 3.45,
           "draw_lay": 3.8,
           "away_back": 2.1,
-          "away_lay": 2.28,
+          "away_lay": 2.26,
+          "spread_home_pct": 3.17,
+          "spread_draw_pct": 2.67,
+          "spread_away_pct": 3.37,
+          "liquid": false,
           "source": "Betfair Exchange"
         },
         "xbet_odds": null,
@@ -636,9 +630,15 @@
           {
             "point": 2.5,
             "over": 1.94,
-            "under": 1.9,
-            "lay_over": 2.12,
-            "lay_under": 2.06
+            "under": 1.91,
+            "lay_over": 2.1,
+            "lay_under": 2.06,
+            "mid_over": 2.0168,
+            "mid_under": 1.9822,
+            "spread_over_pct": 3.93,
+            "spread_under_pct": 3.81,
+            "liquid_over": false,
+            "liquid_under": false
           }
         ],
         "ah_analysis": {},

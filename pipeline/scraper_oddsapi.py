@@ -296,9 +296,11 @@ def fetch_odds_for_events(session, event_ids):
 def extract_betfair_midpoint(odds_data):
     """Extract Betfair Exchange back/lay midpoint from odds response.
 
-    Returns:
-        dict with 'home', 'draw', 'away' midpoint prices,
-        or None if Betfair data not available.
+    Uses true midpoint via implied probabilities:
+      1 / ((1/back + 1/lay) / 2)
+
+    Includes liquidity check: markets with spread > 3% are flagged.
+    Returns None if Betfair data not available.
     """
     bms = odds_data.get("bookmakers", {})
     bf = bms.get("Betfair Exchange", [])
@@ -322,21 +324,30 @@ def extract_betfair_midpoint(odds_data):
     away_back = float(o.get("away", 0))
     away_lay = float(o.get("layAway", 0))
 
-    # Midpoint = (back + lay) / 2  (Caan Berry method)
-    home_mid = (home_back + home_lay) / 2 if home_back and home_lay else home_back
-    draw_mid = (draw_back + draw_lay) / 2 if draw_back and draw_lay else draw_back
-    away_mid = (away_back + away_lay) / 2 if away_back and away_lay else away_back
+    # True midpoint via implied probability (not decimal average)
+    home_mid = true_midpoint(home_back, home_lay) if home_back and home_lay else (home_back or 0)
+    draw_mid = true_midpoint(draw_back, draw_lay) if draw_back and draw_lay else (draw_back or 0)
+    away_mid = true_midpoint(away_back, away_lay) if away_back and away_lay else (away_back or 0)
+
+    # Liquidity spreads
+    h_spread = spread_pct(home_back, home_lay) if home_back and home_lay else 0
+    d_spread = spread_pct(draw_back, draw_lay) if draw_back and draw_lay else 0
+    a_spread = spread_pct(away_back, away_lay) if away_back and away_lay else 0
 
     return {
-        "home": home_mid,
-        "draw": draw_mid,
-        "away": away_mid,
+        "home": round(home_mid, 4),
+        "draw": round(draw_mid, 4),
+        "away": round(away_mid, 4),
         "home_back": home_back,
         "home_lay": home_lay,
         "draw_back": draw_back,
         "draw_lay": draw_lay,
         "away_back": away_back,
         "away_lay": away_lay,
+        "spread_home_pct": round(h_spread * 100, 2),
+        "spread_draw_pct": round(d_spread * 100, 2),
+        "spread_away_pct": round(a_spread * 100, 2),
+        "liquid": h_spread <= LIQUIDITY_THRESHOLD and d_spread <= LIQUIDITY_THRESHOLD and a_spread <= LIQUIDITY_THRESHOLD,
         "source": "Betfair Exchange",
     }
 
@@ -367,28 +378,45 @@ def extract_1xbet_odds(odds_data):
 
 
 def extract_totals(odds_data, bookmaker="Betfair Exchange"):
-    """Extract Over/Under 2.5 odds only from a bookmaker."""
+    """Extract Over/Under 2.5 odds from a bookmaker.
+
+    For Betfair Exchange: includes prob-based midpoint + spread check.
+    For 1xBet (fixed-odds bookmaker): returns raw odds, no midpoint needed.
+    """
     bms = odds_data.get("bookmakers", {})
     bm = bms.get(bookmaker, [])
     if not bm:
         return []
 
+    is_exchange = "Betfair" in bookmaker
+
     for m in bm:
         if m.get("name") == "Totals":
             odds_list = m.get("odds", [])
-            # Only return the 2.5 line
             lines = []
             for o in odds_list:
                 point = float(o.get("hdp", 0))
                 if abs(point - 2.5) > 0.01:
                     continue
-                lines.append({
+                entry = {
                     "point": 2.5,
                     "over": float(o.get("over", 0)),
                     "under": float(o.get("under", 0)),
-                    "lay_over": float(o.get("layOver", 0)),
-                    "lay_under": float(o.get("layUnder", 0)),
-                })
+                }
+                if is_exchange:
+                    lay_over = float(o.get("layOver", 0))
+                    lay_under = float(o.get("layUnder", 0))
+                    entry["lay_over"] = lay_over
+                    entry["lay_under"] = lay_under
+                    # True midpoint via probabilities
+                    entry["mid_over"] = round(true_midpoint(entry["over"], lay_over), 4) if lay_over > 0 else entry["over"]
+                    entry["mid_under"] = round(true_midpoint(entry["under"], lay_under), 4) if lay_under > 0 else entry["under"]
+                    # Spread check
+                    entry["spread_over_pct"] = round(spread_pct(entry["over"], lay_over) * 100, 2) if lay_over > 0 else 0
+                    entry["spread_under_pct"] = round(spread_pct(entry["under"], lay_under) * 100, 2) if lay_under > 0 else 0
+                    entry["liquid_over"] = spread_pct(entry["over"], lay_over) <= LIQUIDITY_THRESHOLD if lay_over > 0 else True
+                    entry["liquid_under"] = spread_pct(entry["under"], lay_under) <= LIQUIDITY_THRESHOLD if lay_under > 0 else True
+                lines.append(entry)
                 break  # Only one 2.5 line
             return lines
     return []
@@ -479,6 +507,36 @@ def compute_vig(odds_list):
     return imp if imp > 0 else 1
 
 
+# ─── True midpoint via implied probability ───
+
+LIQUIDITY_THRESHOLD = 0.03  # 3% max spread between back/lay prob
+
+
+def true_midpoint(back_odds, lay_odds):
+    """Compute true midpoint using implied probabilities, not decimal average.
+
+    1 / ((1/back + 1/lay) / 2)
+
+    Returns 0 if either odds <= 0.
+    """
+    if back_odds <= 0 or lay_odds <= 0:
+        return 0.0
+    prob_back = 1.0 / back_odds
+    prob_lay = 1.0 / lay_odds
+    true_p = (prob_back + prob_lay) / 2.0
+    return 1.0 / true_p if true_p > 0 else 0.0
+
+
+def spread_pct(back_odds, lay_odds):
+    """Return |prob_back - prob_lay| as a decimal (e.g. 0.03 = 3%).
+
+    Returns 1.0 (100%) if either odds <= 0 (invalid).
+    """
+    if back_odds <= 0 or lay_odds <= 0:
+        return 1.0
+    return abs(1.0 / back_odds - 1.0 / lay_odds)
+
+
 def compute_ah_odds(xb, bf):
     """Derive AH -0.5/+0.5 odds from 1X2 odds."""
     ah = {}
@@ -518,10 +576,9 @@ def compute_edges(matches):
 
         edges = []
 
-        # ── Over/Under ALL lines (1xBet vs Betfair) ──
-        # Match totals lines by point value across both bookmakers
+        # ── Over/Under 2.5 (1xBet vs Betfair) ──
+        # Uses prob-based midpoint for Betfair. Discards illiquid markets.
         if xbt and bft:
-            # Build lookup dicts: point -> line
             xb_by_point = {l["point"]: l for l in xbt if l.get("over", 0) > 0 or l.get("under", 0) > 0}
             bf_by_point = {l["point"]: l for l in bft if l.get("over", 0) > 0 or l.get("under", 0) > 0}
             all_points = sorted(set(xb_by_point.keys()) & set(bf_by_point.keys()))
@@ -530,68 +587,84 @@ def compute_edges(matches):
                 bl = bf_by_point[pt]
                 x_over = xl.get("over", 0)
                 x_under = xl.get("under", 0)
-                # Betfair true price = midpoint (back+lay)/2, NOT back price alone
-                b_over_mid = (bl.get("over", 0) + bl.get("lay_over", 0)) / 2 if bl.get("lay_over", 0) > 0 else bl.get("over", 0)
-                b_under_mid = (bl.get("under", 0) + bl.get("lay_under", 0)) / 2 if bl.get("lay_under", 0) > 0 else bl.get("under", 0)
+                # Betfair true price via prob-based midpoint (pre-computed in extract_totals)
+                b_over_mid = bl.get("mid_over", 0)
+                b_under_mid = bl.get("mid_under", 0)
+                # Liquidity check
+                liq_over = bl.get("liquid_over", True)
+                liq_under = bl.get("liquid_under", True)
 
                 if x_over > 0 and b_over_mid > 0:
-                    ev = (x_over - b_over_mid) / b_over_mid * 100
-                    edges.append({
-                        "market": f"Over {pt} (1xBet vs Betfair)",
-                        "edge": round(ev, 1),
-                        "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                        "quarter_kelly_stake": qkelly(ev, x_over),
-                        "xbet_price": x_over,
-                        "betfair_price": round(b_over_mid, 4),
-                        "type": "xbet_vs_betfair",
-                    })
+                    if not liq_over:
+                        print(f"  ⏭️ Market discarded: Illiquid Over {pt} spread (back={bl.get('over',0)}, lay={bl.get('lay_over',0)})")
+                    else:
+                        ev = (x_over - b_over_mid) / b_over_mid * 100
+                        edges.append({
+                            "market": f"Over {pt} (1xBet vs Betfair)",
+                            "edge": round(ev, 1),
+                            "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                            "quarter_kelly_stake": qkelly(ev, x_over),
+                            "xbet_price": x_over,
+                            "betfair_price": round(b_over_mid, 4),
+                            "type": "xbet_vs_betfair",
+                        })
 
                 if x_under > 0 and b_under_mid > 0:
-                    ev = (x_under - b_under_mid) / b_under_mid * 100
-                    edges.append({
-                        "market": f"Under {pt} (1xBet vs Betfair)",
-                        "edge": round(ev, 1),
-                        "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                        "quarter_kelly_stake": qkelly(ev, x_under),
-                        "xbet_price": x_under,
-                        "betfair_price": round(b_under_mid, 4),
-                        "type": "xbet_vs_betfair",
-                    })
+                    if not liq_under:
+                        print(f"  ⏭️ Market discarded: Illiquid Under {pt} spread (back={bl.get('under',0)}, lay={bl.get('lay_under',0)})")
+                    else:
+                        ev = (x_under - b_under_mid) / b_under_mid * 100
+                        edges.append({
+                            "market": f"Under {pt} (1xBet vs Betfair)",
+                            "edge": round(ev, 1),
+                            "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                            "quarter_kelly_stake": qkelly(ev, x_under),
+                            "xbet_price": x_under,
+                            "betfair_price": round(b_under_mid, 4),
+                            "type": "xbet_vs_betfair",
+                        })
 
         # ── Asian Handicap -0.5/+0.5 (1xBet vs Betfair) ──
         if xb and bf:
-            xb_ah = compute_ah_odds(xb, None)
-            bf_ah = compute_ah_odds(bf, None)
+            # Liquidity check: skip AH if baseline spread > 3%
+            if not bf.get("liquid", True):
+                print(f"  ⏭️ Market discarded: Illiquid AH spread "
+                      f"(home={bf.get('spread_home_pct',0):.1f}%, "
+                      f"draw={bf.get('spread_draw_pct',0):.1f}%, "
+                      f"away={bf.get('spread_away_pct',0):.1f}%)")
+            else:
+                xb_ah = compute_ah_odds(xb, None)
+                bf_ah = compute_ah_odds(bf, None)
 
-            # Home -0.5 AH
-            x_h = xb_ah.get("home", 0)
-            b_h = bf_ah.get("home", 0)
-            if x_h > 0 and b_h > 0:
-                ev = (x_h - b_h) / b_h * 100
-                edges.append({
-                    "market": f"{m['home_team']} -0.5 (AH) (1xBet vs Betfair)",
-                    "edge": round(ev, 1),
-                    "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                    "quarter_kelly_stake": qkelly(ev, x_h),
-                    "xbet_price": x_h,
-                    "betfair_price": b_h,
-                    "type": "xbet_vs_betfair",
-                })
+                # Home -0.5 AH
+                x_h = xb_ah.get("home", 0)
+                b_h = bf_ah.get("home", 0)
+                if x_h > 0 and b_h > 0:
+                    ev = (x_h - b_h) / b_h * 100
+                    edges.append({
+                        "market": f"{m['home_team']} -0.5 (AH) (1xBet vs Betfair)",
+                        "edge": round(ev, 1),
+                        "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                        "quarter_kelly_stake": qkelly(ev, x_h),
+                        "xbet_price": x_h,
+                        "betfair_price": b_h,
+                        "type": "xbet_vs_betfair",
+                    })
 
-            # Away +0.5 AH
-            x_a = xb_ah.get("away", 0)
-            b_a = bf_ah.get("away", 0)
-            if x_a > 0 and b_a > 0:
-                ev = (x_a - b_a) / b_a * 100
-                edges.append({
-                    "market": f"{m['away_team']} +0.5 (AH) (1xBet vs Betfair)",
-                    "edge": round(ev, 1),
-                    "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                    "quarter_kelly_stake": qkelly(ev, x_a),
-                    "xbet_price": x_a,
-                    "betfair_price": b_a,
-                    "type": "xbet_vs_betfair",
-                })
+                # Away +0.5 AH
+                x_a = xb_ah.get("away", 0)
+                b_a = bf_ah.get("away", 0)
+                if x_a > 0 and b_a > 0:
+                    ev = (x_a - b_a) / b_a * 100
+                    edges.append({
+                        "market": f"{m['away_team']} +0.5 (AH) (1xBet vs Betfair)",
+                        "edge": round(ev, 1),
+                        "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                        "quarter_kelly_stake": qkelly(ev, x_a),
+                        "xbet_price": x_a,
+                        "betfair_price": b_a,
+                        "type": "xbet_vs_betfair",
+                    })
 
         analysis["edge_summary"] = edges
         if edges:
