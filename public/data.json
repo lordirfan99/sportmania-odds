@@ -1,6 +1,6 @@
 {
   "system_status": {
-    "last_updated": "2026-07-13T02:17:03Z",
+    "last_updated": "2026-07-13T02:23:04Z",
     "bankroll_rm": 34.2,
     "total_profit_rm": 0,
     "total_bets": 0,
@@ -101,12 +101,12 @@
         "betfair_midpoint": {
           "home": 1.2650000000000001,
           "draw": 7.300000000000001,
-          "away": 14.25,
+          "away": 14.5,
           "home_back": 1.26,
           "home_lay": 1.27,
           "draw_back": 7.2,
           "draw_lay": 7.4,
-          "away_back": 13.5,
+          "away_back": 14.0,
           "away_lay": 15.0,
           "source": "Betfair Exchange"
         },
@@ -126,7 +126,7 @@
         "betfair_totals": {
           "point": 2.5,
           "over": 1.5,
-          "under": 2.91,
+          "under": 2.9,
           "lay_over": 1.53,
           "lay_under": 3.0
         },
@@ -143,11 +143,11 @@
           },
           {
             "market": "Under 2.5 (1xBet vs Betfair)",
-            "edge": -15.5,
+            "edge": -15.2,
             "status": "\u274c",
             "quarter_kelly_stake": 0,
             "xbet_price": 2.46,
-            "betfair_price": 2.91,
+            "betfair_price": 2.9,
             "type": "xbet_vs_betfair"
           },
           {
@@ -161,11 +161,11 @@
           },
           {
             "market": "Halmstads BK +0.5 (AH) (1xBet vs Betfair)",
-            "edge": -26.3,
+            "edge": -26.7,
             "status": "\u274c",
             "quarter_kelly_stake": 0,
             "xbet_price": 3.557,
-            "betfair_price": 4.8271,
+            "betfair_price": 4.8555,
             "type": "xbet_vs_betfair"
           }
         ],

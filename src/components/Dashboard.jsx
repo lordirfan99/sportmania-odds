@@ -614,49 +614,55 @@ export default function Dashboard() {
       )}
 
       {/* ════════════════════════════════════════ */}
-      {/* 📊 TOTAL UNDER 2.5 MARKET — All Matches */}
+      {/* 📊 O/U 2.5 MARKET — All Matches Combined */}
       {/* ════════════════════════════════════════ */}
       {(() => {
-        const underEdges = [];
+        const ouRows = [];
         matches.forEach(m => {
           const ev = matchEvals[m.match_id || m.id];
           if (!ev) return;
+          let over = null, under = null;
           ev.decisions.forEach(d => {
-            if (d.market?.startsWith('Under ') && d.market?.includes('(1xBet vs Betfair)')) {
-              underEdges.push({
-                label: d.market.replace(/\s*\(1xBet vs Betfair\)/, ''),
-                edge: d.edge,
-                xb: d.xbet_price || d.xbetPrice || null,
-                bf: d.betfair_price || d.betfairPrice || null,
-                home: m.home_team,
-                away: m.away_team,
-                league: m.stage || m.league_name || '',
-              });
-            }
+            if (!d.market?.includes('(1xBet vs Betfair)')) return;
+            if (d.market?.startsWith('Over ')) over = d;
+            if (d.market?.startsWith('Under ')) under = d;
           });
+          if (over || under) {
+            ouRows.push({ home: m.home_team, away: m.away_team, league: m.stage || m.league_name || '', over, under });
+          }
         });
-        if (underEdges.length === 0) return null;
-        underEdges.sort((a, b) => b.edge - a.edge);
+        if (ouRows.length === 0) return null;
+        ouRows.sort((a, b) => Math.max(b.over?.edge ?? -999, b.under?.edge ?? -999) - Math.max(a.over?.edge ?? -999, a.under?.edge ?? -999));
         return (
           <div className="mb-6 mt-6">
             <div className="flex items-center gap-2 mb-3">
-              <span className="section-header mb-0">📉 Total Under Market ({underEdges.length})</span>
+              <span className="section-header mb-0">📊 O/U 2.5 Market ({ouRows.length} matches)</span>
             </div>
             <div className="grid gap-1.5">
-              <div className="hidden sm:grid grid-cols-[1fr_2fr_auto_auto_auto] gap-2 px-3 py-1.5 text-[0.5rem] text-muted uppercase tracking-wider">
-                <span>#</span><span>Match</span><span>1xBet</span><span>Betfair</span><span>Edge</span>
+              <div className="hidden md:grid grid-cols-[1fr_2fr_0.8fr_0.8fr_0.8fr_0.8fr_0.8fr_0.8fr] gap-2 px-3 py-1.5 text-[0.5rem] text-muted uppercase tracking-wider">
+                <span>#</span><span>Match</span><span>Over 1xBet</span><span>Over Bf</span><span>Over Edge</span><span>Under 1xBet</span><span>Under Bf</span><span>Under Edge</span>
               </div>
-              {underEdges.map((u, i) => (
+              {ouRows.map((row, i) => (
                 <div key={i} className="card flex flex-wrap items-center gap-x-3 gap-y-0.5 py-2 px-3">
                   <span className="text-[0.55rem] text-muted w-4 shrink-0">{i + 1}.</span>
-                  <span className="font-bold text-sm text-white min-w-0 flex-1 truncate">{u.home} vs {u.away}</span>
-                  <span className="text-[0.5rem] text-muted w-full sm:w-auto">{u.league}</span>
-                  <div className="flex items-center gap-2 text-[0.55rem] w-full sm:w-auto sm:ml-auto">
-                    <span className="text-accent-cyan num-mono">{u.xb?.toFixed(2) ?? '-'}</span>
-                    <span className="text-muted">vs</span>
-                    <span className="text-purple-400 num-mono">{u.bf?.toFixed(2) ?? '-'}</span>
-                    <span className={`num-mono font-bold ${u.edge > 0 ? 'text-accent-green' : u.edge > -5 ? 'text-muted' : 'text-accent-red'}`}>
-                      {u.edge > 0 ? '+' : ''}{u.edge.toFixed(1)}%
+                  <span className="font-bold text-sm text-white min-w-0 flex-1 truncate">{row.home} vs {row.away}</span>
+                  <span className="text-[0.5rem] text-muted w-full sm:w-auto hidden sm:block">{row.league}</span>
+                  {/* Over */}
+                  <div className="flex items-center gap-1.5 text-[0.55rem]">
+                    <span className="text-muted uppercase hidden md:inline" />
+                    <span className="text-accent-cyan num-mono">{row.over?.xbet_price?.toFixed(2) ?? '-'}</span>
+                    <span className="text-purple-400 num-mono">{row.over?.betfair_price?.toFixed(2) ?? '-'}</span>
+                    <span className={`num-mono font-bold ${(row.over?.edge ?? -999) > 0 ? 'text-accent-green' : (row.over?.edge ?? -999) > -5 ? 'text-muted' : 'text-accent-red'}`}>
+                      {row.over ? `${row.over.edge > 0 ? '+' : ''}${row.over.edge.toFixed(1)}%` : '-'}
+                    </span>
+                  </div>
+                  {/* Under */}
+                  <div className="flex items-center gap-1.5 text-[0.55rem]">
+                    <span className="text-muted uppercase hidden md:inline" />
+                    <span className="text-accent-cyan num-mono">{row.under?.xbet_price?.toFixed(2) ?? '-'}</span>
+                    <span className="text-purple-400 num-mono">{row.under?.betfair_price?.toFixed(2) ?? '-'}</span>
+                    <span className={`num-mono font-bold ${(row.under?.edge ?? -999) > 0 ? 'text-accent-green' : (row.under?.edge ?? -999) > -5 ? 'text-muted' : 'text-accent-red'}`}>
+                      {row.under ? `${row.under.edge > 0 ? '+' : ''}${row.under.edge.toFixed(1)}%` : '-'}
                     </span>
                   </div>
                 </div>
