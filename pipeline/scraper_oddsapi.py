@@ -674,6 +674,105 @@ def compute_edges(matches):
     return matches
 
 
+def confirm_with_infersports(matches):
+    """Confirm positive edges using InferSports sharp fair lines (Pinnacle).
+
+    For each match with a positive edge, calls InferSports compare_prob API
+    to check if 1xBet's price beats their sharp fair line too.
+    Adds 'infersports' field to edge entries. Graceful if API is down/slow.
+    """
+    import json as _json, time as _time
+
+    api_base = "https://api.infersports.dev/v1/mcp/compare_prob"
+    session = requests.Session()
+    session.headers.update({"Content-Type": "application/json", "Accept": "application/json"})
+
+    confirmed_count = 0
+    for m in matches:
+        edges = m.get("analysis", {}).get("edge_summary", [])
+        pos_edges = [e for e in edges if e.get("edge", 0) > 3 and not e.get("infersports")]
+        if not pos_edges:
+            continue
+
+        query = f"{m['home_team']} vs {m['away_team']}"
+        xb = m.get("analysis", {}).get("xbet_odds", {})
+
+        for e in pos_edges:
+            market = e.get("market", "")
+            outcome = None
+            market_type = None
+            external_prob = None
+
+            if "(AH)" in market:
+                market_type = "asian_handicap"
+                if m["home_team"] in market:
+                    outcome = "home"
+                    ext_odds = e.get("xbet_price", 0)
+                    external_prob = 1.0 / ext_odds if ext_odds > 0 else None
+                elif m["away_team"] in market:
+                    outcome = "away"
+                    ext_odds = e.get("xbet_price", 0)
+                    external_prob = 1.0 / ext_odds if ext_odds > 0 else None
+            elif "Over" in market:
+                market_type = "totals"
+                outcome = "over"
+                ext_odds = e.get("xbet_price", 0)
+                external_prob = 1.0 / ext_odds if ext_odds > 0 else None
+            elif "Under" in market:
+                market_type = "totals"
+                outcome = "under"
+                ext_odds = e.get("xbet_price", 0)
+                external_prob = 1.0 / ext_odds if ext_odds > 0 else None
+
+            if not market_type or not outcome or external_prob is None:
+                continue
+
+            try:
+                r = session.post(api_base, json={
+                    "query": query,
+                    "external_prob": round(external_prob, 4),
+                    "market_type": market_type,
+                    "outcome": outcome,
+                    "external_label": "1xBet Malaysia",
+                    "sport": "football",
+                }, timeout=8)
+
+                if r.status_code != 200:
+                    continue
+
+                result = r.json()
+                if result.get("status") != "ok":
+                    continue
+
+                fair_p = result.get("fair_prob", 0)
+                fair_d = result.get("fair_decimal", 0)
+                verdict = result.get("verdict", "no_edge")
+                edge_pp = result.get("edge_pp", 0)
+                fair_from = result.get("fair_from", "?")
+
+                # InferSports edge_pp = (fair_prob - external_prob) * 100
+                # Positive edge_pp → 1xBet offering better than fair → CONFIRMED
+                e["infersports"] = {
+                    "verdict": verdict,
+                    "fair_prob": round(fair_p, 4) if fair_p else 0,
+                    "fair_odds": round(fair_d, 4) if fair_d else 0,
+                    "edge_pp": round(edge_pp, 1) if edge_pp else 0,
+                    "fair_from": fair_from,
+                    "confirmed": verdict == "good" or edge_pp > 3,
+                }
+                if verdict == "good" or edge_pp > 3:
+                    e["status"] = "🚀"  # upgrade: confirmed by 2 sources
+                    confirmed_count += 1
+                    print(f"  ✅ INFERSPORTS confirmed: {m['home_team']} vs {m['away_team']} — {market}")
+
+            except Exception as exc:
+                print(f"  ⏳ INFERSPORTS skip ({type(exc).__name__})")
+
+    if confirmed_count:
+        print(f"  📊 InferSports confirmed {confirmed_count} edges")
+    return matches
+
+
 if __name__ == "__main__":
     import json
     session = requests.Session()
@@ -681,6 +780,13 @@ if __name__ == "__main__":
 
     matches = scrape_all(session)
     matches = compute_edges(matches)
+
+    # ── Confirm positive edges via InferSports (Pinnacle sharp lines) ──
+    print(f"\n{'─'*40}")
+    print("CONFIRMING EDGES VIA INFERSPORTS")
+    print(f"{'─'*40}")
+    matches = confirm_with_infersports(matches)
+
     print(f"\n✅ {len(matches)} matches with Betfair + 1xBet odds")
     for m in matches[:5]:
         xb = m["analysis"].get("xbet_odds", {})
