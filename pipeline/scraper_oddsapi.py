@@ -530,30 +530,31 @@ def compute_edges(matches):
                 bl = bf_by_point[pt]
                 x_over = xl.get("over", 0)
                 x_under = xl.get("under", 0)
-                b_over = bl.get("over", 0)
-                b_under = bl.get("under", 0)
+                # Betfair true price = midpoint (back+lay)/2, NOT back price alone
+                b_over_mid = (bl.get("over", 0) + bl.get("lay_over", 0)) / 2 if bl.get("lay_over", 0) > 0 else bl.get("over", 0)
+                b_under_mid = (bl.get("under", 0) + bl.get("lay_under", 0)) / 2 if bl.get("lay_under", 0) > 0 else bl.get("under", 0)
 
-                if x_over > 0 and b_over > 0:
-                    ev = (x_over - b_over) / b_over * 100
+                if x_over > 0 and b_over_mid > 0:
+                    ev = (x_over - b_over_mid) / b_over_mid * 100
                     edges.append({
                         "market": f"Over {pt} (1xBet vs Betfair)",
                         "edge": round(ev, 1),
                         "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
                         "quarter_kelly_stake": qkelly(ev, x_over),
                         "xbet_price": x_over,
-                        "betfair_price": b_over,
+                        "betfair_price": round(b_over_mid, 4),
                         "type": "xbet_vs_betfair",
                     })
 
-                if x_under > 0 and b_under > 0:
-                    ev = (x_under - b_under) / b_under * 100
+                if x_under > 0 and b_under_mid > 0:
+                    ev = (x_under - b_under_mid) / b_under_mid * 100
                     edges.append({
                         "market": f"Under {pt} (1xBet vs Betfair)",
                         "edge": round(ev, 1),
                         "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
                         "quarter_kelly_stake": qkelly(ev, x_under),
                         "xbet_price": x_under,
-                        "betfair_price": b_under,
+                        "betfair_price": round(b_under_mid, 4),
                         "type": "xbet_vs_betfair",
                     })
 
