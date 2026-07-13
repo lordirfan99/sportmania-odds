@@ -367,37 +367,29 @@ def extract_1xbet_odds(odds_data):
 
 
 def extract_totals(odds_data, bookmaker="Betfair Exchange"):
-    """Extract Over/Under 2.5 odds from a bookmaker. Only returns the 2.5 line."""
+    """Extract ALL Over/Under lines from a bookmaker. Returns list of {point, over, under}."""
     bms = odds_data.get("bookmakers", {})
     bm = bms.get(bookmaker, [])
     if not bm:
-        return None
+        return []
 
     for m in bm:
         if m.get("name") == "Totals":
             odds_list = m.get("odds", [])
-            # Find the 2.5 line specifically
+            lines = []
             for o in odds_list:
                 point = float(o.get("hdp", 0))
-                if abs(point - 2.5) < 0.01:
-                    return {
-                        "point": 2.5,
-                        "over": float(o.get("over", 0)),
-                        "under": float(o.get("under", 0)),
-                        "lay_over": float(o.get("layOver", 0)),
-                        "lay_under": float(o.get("layUnder", 0)),
-                    }
-            # Fallback: if no 2.5 line, return the first line (data may be sparse)
-            if odds_list:
-                o = odds_list[0]
-                return {
-                    "point": float(o.get("hdp", 2.5)),
+                if point <= 0:
+                    continue
+                lines.append({
+                    "point": round(point, 2),
                     "over": float(o.get("over", 0)),
                     "under": float(o.get("under", 0)),
                     "lay_over": float(o.get("layOver", 0)),
                     "lay_under": float(o.get("layUnder", 0)),
-                }
-    return None
+                })
+            return lines
+    return []
 
 
 def scrape_all(session=None):
@@ -462,14 +454,14 @@ def scrape_all(session=None):
                     "away": xb_odds["away"] if xb_odds else 0,
                     "vig": 0,
                     "source": xb_odds["source"] if xb_odds else "Betfair Exchange",
-                    "over_odds": xb_totals["over"] if xb_totals else (bf_totals["over"] if bf_totals else 0),
-                    "under_odds": xb_totals["under"] if xb_totals else (bf_totals["under"] if bf_totals else 0),
-                    "ou_point": xb_totals["point"] if xb_totals else (bf_totals["point"] if bf_totals else 2.5),
+                    "over_odds": xb_totals[0]["over"] if xb_totals else (bf_totals[0]["over"] if bf_totals else 0),
+                    "under_odds": xb_totals[0]["under"] if xb_totals else (bf_totals[0]["under"] if bf_totals else 0),
+                    "ou_point": xb_totals[0]["point"] if xb_totals else (bf_totals[0]["point"] if bf_totals else 2.5),
                 },
                 "betfair_midpoint": bf_mid,
                 "xbet_odds": xb_odds,
-                "xbet_totals": xb_totals if xb_totals else {},
-                "betfair_totals": bf_totals if bf_totals else {},
+                "xbet_totals": xb_totals if xb_totals else [],
+                "betfair_totals": bf_totals if bf_totals else [],
                 "ah_analysis": {},
                 "edge_summary": [],
                 "narrative": {"form": "", "injuries": "", "tactical": ""},
@@ -516,37 +508,44 @@ def compute_edges(matches):
 
         edges = []
 
-        # ── Over/Under 2.5 (1xBet vs Betfair) ──
+        # ── Over/Under ALL lines (1xBet vs Betfair) ──
+        # Match totals lines by point value across both bookmakers
         if xbt and bft:
-            ou_point = xbt.get("point", 2.5) or bft.get("point", 2.5)
-            x_over = xbt.get("over", 0)
-            x_under = xbt.get("under", 0)
-            b_over = bft.get("over", 0)
-            b_under = bft.get("under", 0)
+            # Build lookup dicts: point -> line
+            xb_by_point = {l["point"]: l for l in xbt if l.get("over", 0) > 0 or l.get("under", 0) > 0}
+            bf_by_point = {l["point"]: l for l in bft if l.get("over", 0) > 0 or l.get("under", 0) > 0}
+            all_points = sorted(set(xb_by_point.keys()) & set(bf_by_point.keys()))
+            for pt in all_points:
+                xl = xb_by_point[pt]
+                bl = bf_by_point[pt]
+                x_over = xl.get("over", 0)
+                x_under = xl.get("under", 0)
+                b_over = bl.get("over", 0)
+                b_under = bl.get("under", 0)
 
-            if x_over > 0 and b_over > 0:
-                ev = (x_over - b_over) / b_over * 100
-                edges.append({
-                    "market": f"Over {ou_point} (1xBet vs Betfair)",
-                    "edge": round(ev, 1),
-                    "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                    "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
-                    "xbet_price": x_over,
-                    "betfair_price": b_over,
-                    "type": "xbet_vs_betfair",
-                })
+                if x_over > 0 and b_over > 0:
+                    ev = (x_over - b_over) / b_over * 100
+                    edges.append({
+                        "market": f"Over {pt} (1xBet vs Betfair)",
+                        "edge": round(ev, 1),
+                        "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                        "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                        "xbet_price": x_over,
+                        "betfair_price": b_over,
+                        "type": "xbet_vs_betfair",
+                    })
 
-            if x_under > 0 and b_under > 0:
-                ev = (x_under - b_under) / b_under * 100
-                edges.append({
-                    "market": f"Under {ou_point} (1xBet vs Betfair)",
-                    "edge": round(ev, 1),
-                    "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                    "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
-                    "xbet_price": x_under,
-                    "betfair_price": b_under,
-                    "type": "xbet_vs_betfair",
-                })
+                if x_under > 0 and b_under > 0:
+                    ev = (x_under - b_under) / b_under * 100
+                    edges.append({
+                        "market": f"Under {pt} (1xBet vs Betfair)",
+                        "edge": round(ev, 1),
+                        "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
+                        "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                        "xbet_price": x_under,
+                        "betfair_price": b_under,
+                        "type": "xbet_vs_betfair",
+                    })
 
         # ── Asian Handicap -0.5/+0.5 (1xBet vs Betfair) ──
         if xb and bf:
