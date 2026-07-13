@@ -1,6 +1,6 @@
 {
   "system_status": {
-    "last_updated": "2026-07-13T02:26:13Z",
+    "last_updated": "2026-07-13T02:34:17Z",
     "bankroll_rm": 34.2,
     "total_profit_rm": 0,
     "total_bets": 0,
@@ -34,9 +34,9 @@
           "away": 0,
           "vig": 0,
           "source": "Betfair Exchange",
-          "over_odds": 4.16,
-          "under_odds": 1.22,
-          "ou_point": 4.0
+          "over_odds": 1.66,
+          "under_odds": 2.3,
+          "ou_point": 2.5
         },
         "betfair_midpoint": {
           "home": 1.22,
@@ -54,207 +54,11 @@
         "xbet_totals": [],
         "betfair_totals": [
           {
-            "point": 4.0,
-            "over": 4.16,
-            "under": 1.22,
-            "lay_over": 5.48,
-            "lay_under": 1.32
-          },
-          {
-            "point": 1.25,
-            "over": 1.14,
-            "under": 7.01,
-            "lay_over": 1.17,
-            "lay_under": 8.12
-          },
-          {
-            "point": 3.5,
-            "over": 2.72,
-            "under": 1.52,
-            "lay_over": 2.93,
-            "lay_under": 1.59
-          },
-          {
-            "point": 5.25,
-            "over": 10.09,
-            "under": 1.07,
-            "lay_over": 15.25,
-            "lay_under": 1.11
-          },
-          {
-            "point": 5.0,
-            "over": 9.52,
-            "under": 1.07,
-            "lay_over": 14.5,
-            "lay_under": 1.12
-          },
-          {
-            "point": 3.75,
-            "over": 3.22,
-            "under": 1.33,
-            "lay_over": 4.04,
-            "lay_under": 1.45
-          },
-          {
-            "point": 2.25,
-            "over": 1.48,
-            "under": 2.69,
-            "lay_over": 1.59,
-            "lay_under": 3.06
-          },
-          {
-            "point": 2.75,
-            "over": 1.82,
-            "under": 1.9,
-            "lay_over": 2.12,
-            "lay_under": 2.22
-          },
-          {
-            "point": 2.0,
-            "over": 1.31,
-            "under": 3.43,
-            "lay_over": 1.41,
-            "lay_under": 4.2
-          },
-          {
-            "point": 6.5,
-            "over": 10.99,
-            "under": 1.03,
-            "lay_over": 101.0,
-            "lay_under": 1.1
-          },
-          {
-            "point": 3.25,
-            "over": 2.4,
-            "under": 1.6,
-            "lay_over": 2.67,
-            "lay_under": 1.72
-          },
-          {
-            "point": 1.5,
-            "over": 1.23,
-            "under": 4.9,
-            "lay_over": 1.26,
-            "lay_under": 5.35
-          },
-          {
-            "point": 5.75,
-            "over": 11.0,
-            "under": 1.04,
-            "lay_over": 25.46,
-            "lay_under": 1.09
-          },
-          {
-            "point": 6.25,
-            "over": 10.99,
-            "under": 1.03,
-            "lay_over": 98.15,
-            "lay_under": 1.09
-          },
-          {
             "point": 2.5,
             "over": 1.66,
             "under": 2.3,
             "lay_over": 1.77,
             "lay_under": 2.54
-          },
-          {
-            "point": 7.5,
-            "over": 11.0,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 1.09
-          },
-          {
-            "point": 7.25,
-            "over": 10.99,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 1.09
-          },
-          {
-            "point": 5.5,
-            "over": 10.25,
-            "under": 1.06,
-            "lay_over": 16.0,
-            "lay_under": 1.1
-          },
-          {
-            "point": 7.0,
-            "over": 10.99,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 1.09
-          },
-          {
-            "point": 3.0,
-            "over": 2.08,
-            "under": 1.71,
-            "lay_over": 2.41,
-            "lay_under": 1.92
-          },
-          {
-            "point": 4.5,
-            "over": 5.0,
-            "under": 1.17,
-            "lay_over": 6.6,
-            "lay_under": 1.25
-          },
-          {
-            "point": 1.0,
-            "over": 1.05,
-            "under": 7.66,
-            "lay_over": 1.08,
-            "lay_under": 20.52
-          },
-          {
-            "point": 0.5,
-            "over": 1.04,
-            "under": 15.28,
-            "lay_over": 1.07,
-            "lay_under": 24.0
-          },
-          {
-            "point": 0.75,
-            "over": 1.04,
-            "under": 7.93,
-            "lay_over": 1.07,
-            "lay_under": 22.26
-          },
-          {
-            "point": 4.75,
-            "over": 6.5,
-            "under": 1.13,
-            "lay_over": 8.69,
-            "lay_under": 1.19
-          },
-          {
-            "point": 6.75,
-            "over": 11.0,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 1.09
-          },
-          {
-            "point": 1.75,
-            "over": 1.26,
-            "under": 3.85,
-            "lay_over": 1.35,
-            "lay_under": 4.78
-          },
-          {
-            "point": 6.0,
-            "over": 11.0,
-            "under": 1.03,
-            "lay_over": 95.3,
-            "lay_under": 1.09
-          },
-          {
-            "point": 4.25,
-            "over": 4.58,
-            "under": 1.2,
-            "lay_over": 5.95,
-            "lay_under": 1.28
           }
         ],
         "ah_analysis": {},
@@ -292,18 +96,18 @@
           "away": 9.75,
           "vig": 0,
           "source": "1xbet",
-          "over_odds": 1.13,
-          "under_odds": 4.85,
-          "ou_point": 1.5
+          "over_odds": 1.44,
+          "under_odds": 2.46,
+          "ou_point": 2.5
         },
         "betfair_midpoint": {
           "home": 1.2650000000000001,
-          "draw": 7.300000000000001,
+          "draw": 7.4,
           "away": 14.5,
           "home_back": 1.26,
           "home_lay": 1.27,
           "draw_back": 7.2,
-          "draw_lay": 7.4,
+          "draw_lay": 7.6,
           "away_back": 14.0,
           "away_lay": 15.0,
           "source": "Betfair Exchange"
@@ -316,266 +120,24 @@
         },
         "xbet_totals": [
           {
-            "point": 1.5,
-            "over": 1.13,
-            "under": 4.85,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
             "point": 2.5,
             "over": 1.44,
             "under": 2.46,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 3.5,
-            "over": 2.13,
-            "under": 1.61,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 4.5,
-            "over": 3.45,
-            "under": 1.25,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 5.5,
-            "over": 6.15,
-            "under": 1.09,
             "lay_over": 0.0,
             "lay_under": 0.0
           }
         ],
         "betfair_totals": [
           {
-            "point": 4.5,
-            "over": 3.95,
-            "under": 1.32,
-            "lay_over": 4.13,
-            "lay_under": 1.34
-          },
-          {
-            "point": 5.0,
-            "over": 6.82,
-            "under": 1.15,
-            "lay_over": 7.56,
-            "lay_under": 1.18
-          },
-          {
-            "point": 1.75,
-            "over": 1.18,
-            "under": 5.04,
-            "lay_over": 1.25,
-            "lay_under": 6.5
-          },
-          {
             "point": 2.5,
             "over": 1.5,
             "under": 2.91,
             "lay_over": 1.53,
             "lay_under": 3.0
-          },
-          {
-            "point": 6.5,
-            "over": 17.66,
-            "under": 1.05,
-            "lay_over": 21.0,
-            "lay_under": 1.06
-          },
-          {
-            "point": 0.5,
-            "over": 1.03,
-            "under": 27.0,
-            "lay_over": 1.04,
-            "lay_under": 32.0
-          },
-          {
-            "point": 4.75,
-            "over": 4.91,
-            "under": 1.23,
-            "lay_over": 5.3,
-            "lay_under": 1.26
-          },
-          {
-            "point": 7.0,
-            "over": 38.73,
-            "under": 1.01,
-            "lay_over": 100.0,
-            "lay_under": 1.03
-          },
-          {
-            "point": 1.25,
-            "over": 1.09,
-            "under": 8.49,
-            "lay_over": 1.14,
-            "lay_under": 11.13
-          },
-          {
-            "point": 5.25,
-            "over": 7.31,
-            "under": 1.14,
-            "lay_over": 8.08,
-            "lay_under": 1.16
-          },
-          {
-            "point": 1.5,
-            "over": 1.16,
-            "under": 6.8,
-            "lay_over": 1.18,
-            "lay_under": 7.2
-          },
-          {
-            "point": 6.25,
-            "over": 17.03,
-            "under": 1.05,
-            "lay_over": 20.31,
-            "lay_under": 1.07
-          },
-          {
-            "point": 3.75,
-            "over": 2.6,
-            "under": 1.55,
-            "lay_over": 2.79,
-            "lay_under": 1.63
-          },
-          {
-            "point": 1.0,
-            "over": 1.03,
-            "under": 10.45,
-            "lay_over": 1.11,
-            "lay_under": 28.56
-          },
-          {
-            "point": 4.25,
-            "over": 3.57,
-            "under": 1.36,
-            "lay_over": 3.78,
-            "lay_under": 1.39
-          },
-          {
-            "point": 6.75,
-            "over": 24.12,
-            "under": 1.01,
-            "lay_over": 100.0,
-            "lay_under": 1.05
-          },
-          {
-            "point": 5.5,
-            "over": 7.8,
-            "under": 1.13,
-            "lay_over": 8.6,
-            "lay_under": 1.15
-          },
-          {
-            "point": 2.0,
-            "over": 1.2,
-            "under": 4.6,
-            "lay_over": 1.28,
-            "lay_under": 5.8
-          },
-          {
-            "point": 2.75,
-            "over": 1.6,
-            "under": 2.47,
-            "lay_over": 1.68,
-            "lay_under": 2.67
-          },
-          {
-            "point": 4.0,
-            "over": 3.2,
-            "under": 1.41,
-            "lay_over": 3.43,
-            "lay_under": 1.46
-          },
-          {
-            "point": 5.75,
-            "over": 10.43,
-            "under": 1.09,
-            "lay_over": 12.0,
-            "lay_under": 1.11
-          },
-          {
-            "point": 7.25,
-            "over": 39.36,
-            "under": 1.01,
-            "lay_over": 100.0,
-            "lay_under": 1.03
-          },
-          {
-            "point": 3.0,
-            "over": 1.75,
-            "under": 2.2,
-            "lay_over": 1.84,
-            "lay_under": 2.33
-          },
-          {
-            "point": 2.25,
-            "over": 1.35,
-            "under": 3.5,
-            "lay_over": 1.4,
-            "lay_under": 3.83
-          },
-          {
-            "point": 0.75,
-            "over": 1.03,
-            "under": 10.72,
-            "lay_over": 1.11,
-            "lay_under": 30.28
-          },
-          {
-            "point": 3.5,
-            "over": 2.26,
-            "under": 1.76,
-            "lay_over": 2.32,
-            "lay_under": 1.79
-          },
-          {
-            "point": 3.25,
-            "over": 2.01,
-            "under": 1.93,
-            "lay_over": 2.08,
-            "lay_under": 1.99
-          },
-          {
-            "point": 6.0,
-            "over": 16.4,
-            "under": 1.05,
-            "lay_over": 19.62,
-            "lay_under": 1.07
-          },
-          {
-            "point": 7.5,
-            "over": 40.0,
-            "under": 1.01,
-            "lay_over": 100.0,
-            "lay_under": 1.03
           }
         ],
         "ah_analysis": {},
         "edge_summary": [
-          {
-            "market": "Over 1.5 (1xBet vs Betfair)",
-            "edge": -2.6,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.13,
-            "betfair_price": 1.16,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 1.5 (1xBet vs Betfair)",
-            "edge": -28.7,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 4.85,
-            "betfair_price": 6.8,
-            "type": "xbet_vs_betfair"
-          },
           {
             "market": "Over 2.5 (1xBet vs Betfair)",
             "edge": -4.0,
@@ -595,60 +157,6 @@
             "type": "xbet_vs_betfair"
           },
           {
-            "market": "Over 3.5 (1xBet vs Betfair)",
-            "edge": -5.8,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 2.13,
-            "betfair_price": 2.26,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 3.5 (1xBet vs Betfair)",
-            "edge": -8.5,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.61,
-            "betfair_price": 1.76,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 4.5 (1xBet vs Betfair)",
-            "edge": -12.7,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 3.45,
-            "betfair_price": 3.95,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 4.5 (1xBet vs Betfair)",
-            "edge": -5.3,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.25,
-            "betfair_price": 1.32,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 5.5 (1xBet vs Betfair)",
-            "edge": -21.2,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 6.15,
-            "betfair_price": 7.8,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 5.5 (1xBet vs Betfair)",
-            "edge": -3.5,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.09,
-            "betfair_price": 1.13,
-            "type": "xbet_vs_betfair"
-          },
-          {
             "market": "Djurgardens IF -0.5 (AH) (1xBet vs Betfair)",
             "edge": -0.4,
             "status": "\u26aa",
@@ -659,11 +167,11 @@
           },
           {
             "market": "Halmstads BK +0.5 (AH) (1xBet vs Betfair)",
-            "edge": -26.7,
+            "edge": -27.4,
             "status": "\u274c",
             "quarter_kelly_stake": 0,
             "xbet_price": 3.557,
-            "betfair_price": 4.8555,
+            "betfair_price": 4.8995,
             "type": "xbet_vs_betfair"
           }
         ],
@@ -700,9 +208,9 @@
           "away": 2.5,
           "vig": 0,
           "source": "1xbet",
-          "over_odds": 13.5,
-          "under_odds": 1.02,
-          "ou_point": 4.5
+          "over_odds": 2.85,
+          "under_odds": 1.36,
+          "ou_point": 2.5
         },
         "betfair_midpoint": {
           "home": 3.325,
@@ -724,114 +232,9 @@
         },
         "xbet_totals": [
           {
-            "point": 4.5,
-            "over": 13.5,
-            "under": 1.02,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 5.5,
-            "over": 17.0,
-            "under": 1.005,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 0.5,
-            "over": 1.1,
-            "under": 5.6,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 0.75,
-            "over": 1.137,
-            "under": 4.745,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 1.0,
-            "over": 1.2,
-            "under": 3.9,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 1.25,
-            "over": 1.41,
-            "under": 2.7,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 1.5,
-            "over": 1.6,
-            "under": 2.2,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 1.75,
-            "over": 1.782,
-            "under": 1.922,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 2.0,
-            "over": 2.12,
-            "under": 1.64,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 2.25,
-            "over": 2.502,
-            "under": 1.471,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
             "point": 2.5,
             "over": 2.85,
             "under": 1.36,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 2.75,
-            "over": 3.475,
-            "under": 1.251,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 3.0,
-            "over": 4.6,
-            "under": 1.15,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 3.25,
-            "over": 5.27,
-            "under": 1.114,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 3.5,
-            "over": 5.9,
-            "under": 1.09,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
-            "point": 4.0,
-            "over": 9.9,
-            "under": 1.01,
             "lay_over": 0.0,
             "lay_under": 0.0
           }
@@ -843,322 +246,10 @@
             "under": 1.41,
             "lay_over": 3.44,
             "lay_under": 1.52
-          },
-          {
-            "point": 6.0,
-            "over": 147.87,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.06
-          },
-          {
-            "point": 3.0,
-            "over": 5.38,
-            "under": 1.16,
-            "lay_over": 6.92,
-            "lay_under": 1.23
-          },
-          {
-            "point": 5.0,
-            "over": 46.33,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.03
-          },
-          {
-            "point": 2.75,
-            "over": 3.69,
-            "under": 1.26,
-            "lay_over": 4.83,
-            "lay_under": 1.38
-          },
-          {
-            "point": 4.75,
-            "over": 25.72,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 1.05
-          },
-          {
-            "point": 2.0,
-            "over": 2.17,
-            "under": 1.67,
-            "lay_over": 2.48,
-            "lay_under": 1.85
-          },
-          {
-            "point": 4.5,
-            "over": 18.0,
-            "under": 1.05,
-            "lay_over": 23.63,
-            "lay_under": 1.06
-          },
-          {
-            "point": 4.0,
-            "over": 16.23,
-            "under": 1.05,
-            "lay_over": 21.0,
-            "lay_under": 1.07
-          },
-          {
-            "point": 5.5,
-            "over": 48.0,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.03
-          },
-          {
-            "point": 6.5,
-            "over": 150.0,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.06
-          },
-          {
-            "point": 4.25,
-            "over": 17.11,
-            "under": 1.05,
-            "lay_over": 22.32,
-            "lay_under": 1.07
-          },
-          {
-            "point": 1.75,
-            "over": 1.82,
-            "under": 1.96,
-            "lay_over": 2.04,
-            "lay_under": 2.21
-          },
-          {
-            "point": 1.5,
-            "over": 1.64,
-            "under": 2.54,
-            "lay_over": 1.65,
-            "lay_under": 2.57
-          },
-          {
-            "point": 2.25,
-            "over": 2.55,
-            "under": 1.51,
-            "lay_over": 2.96,
-            "lay_under": 1.65
-          },
-          {
-            "point": 3.5,
-            "over": 6.52,
-            "under": 1.14,
-            "lay_over": 8.0,
-            "lay_under": 1.19
-          },
-          {
-            "point": 1.25,
-            "over": 1.43,
-            "under": 3.1,
-            "lay_over": 1.48,
-            "lay_under": 3.32
-          },
-          {
-            "point": 1.0,
-            "over": 1.22,
-            "under": 4.3,
-            "lay_over": 1.31,
-            "lay_under": 5.46
-          },
-          {
-            "point": 6.25,
-            "over": 148.93,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.06
-          },
-          {
-            "point": 0.5,
-            "over": 1.13,
-            "under": 6.2,
-            "lay_over": 1.2,
-            "lay_under": 8.49
-          },
-          {
-            "point": 5.25,
-            "over": 47.16,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.03
-          },
-          {
-            "point": 3.75,
-            "over": 9.1,
-            "under": 1.09,
-            "lay_over": 12.12,
-            "lay_under": 1.13
-          },
-          {
-            "point": 0.75,
-            "over": 1.18,
-            "under": 4.88,
-            "lay_over": 1.26,
-            "lay_under": 6.41
-          },
-          {
-            "point": 3.25,
-            "over": 5.95,
-            "under": 1.15,
-            "lay_over": 7.46,
-            "lay_under": 1.21
-          },
-          {
-            "point": 5.75,
-            "over": 72.21,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.06
           }
         ],
         "ah_analysis": {},
         "edge_summary": [
-          {
-            "market": "Over 0.5 (1xBet vs Betfair)",
-            "edge": -2.7,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.1,
-            "betfair_price": 1.13,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 0.5 (1xBet vs Betfair)",
-            "edge": -9.7,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 5.6,
-            "betfair_price": 6.2,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 0.75 (1xBet vs Betfair)",
-            "edge": -3.6,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.137,
-            "betfair_price": 1.18,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 0.75 (1xBet vs Betfair)",
-            "edge": -2.8,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 4.745,
-            "betfair_price": 4.88,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 1.0 (1xBet vs Betfair)",
-            "edge": -1.6,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.2,
-            "betfair_price": 1.22,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 1.0 (1xBet vs Betfair)",
-            "edge": -9.3,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 3.9,
-            "betfair_price": 4.3,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 1.25 (1xBet vs Betfair)",
-            "edge": -1.4,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.41,
-            "betfair_price": 1.43,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 1.25 (1xBet vs Betfair)",
-            "edge": -12.9,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 2.7,
-            "betfair_price": 3.1,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 1.5 (1xBet vs Betfair)",
-            "edge": -2.4,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.6,
-            "betfair_price": 1.64,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 1.5 (1xBet vs Betfair)",
-            "edge": -13.4,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 2.2,
-            "betfair_price": 2.54,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 1.75 (1xBet vs Betfair)",
-            "edge": -2.1,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.782,
-            "betfair_price": 1.82,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 1.75 (1xBet vs Betfair)",
-            "edge": -1.9,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.922,
-            "betfair_price": 1.96,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 2.0 (1xBet vs Betfair)",
-            "edge": -2.3,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 2.12,
-            "betfair_price": 2.17,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 2.0 (1xBet vs Betfair)",
-            "edge": -1.8,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.64,
-            "betfair_price": 1.67,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 2.25 (1xBet vs Betfair)",
-            "edge": -1.9,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 2.502,
-            "betfair_price": 2.55,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 2.25 (1xBet vs Betfair)",
-            "edge": -2.6,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.471,
-            "betfair_price": 1.51,
-            "type": "xbet_vs_betfair"
-          },
           {
             "market": "Over 2.5 (1xBet vs Betfair)",
             "edge": -2.7,
@@ -1175,132 +266,6 @@
             "quarter_kelly_stake": 0,
             "xbet_price": 1.36,
             "betfair_price": 1.41,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 2.75 (1xBet vs Betfair)",
-            "edge": -5.8,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 3.475,
-            "betfair_price": 3.69,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 2.75 (1xBet vs Betfair)",
-            "edge": -0.7,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.251,
-            "betfair_price": 1.26,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 3.0 (1xBet vs Betfair)",
-            "edge": -14.5,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 4.6,
-            "betfair_price": 5.38,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 3.0 (1xBet vs Betfair)",
-            "edge": -0.9,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.15,
-            "betfair_price": 1.16,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 3.25 (1xBet vs Betfair)",
-            "edge": -11.4,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 5.27,
-            "betfair_price": 5.95,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 3.25 (1xBet vs Betfair)",
-            "edge": -3.1,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.114,
-            "betfair_price": 1.15,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 3.5 (1xBet vs Betfair)",
-            "edge": -9.5,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 5.9,
-            "betfair_price": 6.52,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 3.5 (1xBet vs Betfair)",
-            "edge": -4.4,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.09,
-            "betfair_price": 1.14,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 4.0 (1xBet vs Betfair)",
-            "edge": -39.0,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 9.9,
-            "betfair_price": 16.23,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 4.0 (1xBet vs Betfair)",
-            "edge": -3.8,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.01,
-            "betfair_price": 1.05,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 4.5 (1xBet vs Betfair)",
-            "edge": -25.0,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 13.5,
-            "betfair_price": 18.0,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 4.5 (1xBet vs Betfair)",
-            "edge": -2.9,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.02,
-            "betfair_price": 1.05,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Over 5.5 (1xBet vs Betfair)",
-            "edge": -64.6,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 17.0,
-            "betfair_price": 48.0,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 5.5 (1xBet vs Betfair)",
-            "edge": -1.5,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.005,
-            "betfair_price": 1.02,
             "type": "xbet_vs_betfair"
           },
           {
@@ -1355,9 +320,9 @@
           "away": 2.2,
           "vig": 0,
           "source": "1xbet",
-          "over_odds": 1.6,
-          "under_odds": 2.15,
-          "ou_point": 1.5
+          "over_odds": 2.78,
+          "under_odds": 1.35,
+          "ou_point": 2.5
         },
         "betfair_midpoint": {
           "home": 4.275,
@@ -1379,13 +344,6 @@
         },
         "xbet_totals": [
           {
-            "point": 1.5,
-            "over": 1.6,
-            "under": 2.15,
-            "lay_over": 0.0,
-            "lay_under": 0.0
-          },
-          {
             "point": 2.5,
             "over": 2.78,
             "under": 1.35,
@@ -1395,201 +353,15 @@
         ],
         "betfair_totals": [
           {
-            "point": 6.25,
-            "over": 158.93,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.06
-          },
-          {
-            "point": 4.0,
-            "over": 15.98,
-            "under": 1.05,
-            "lay_over": 24.22,
-            "lay_under": 1.07
-          },
-          {
-            "point": 2.25,
-            "over": 2.58,
-            "under": 1.48,
-            "lay_over": 3.07,
-            "lay_under": 1.64
-          },
-          {
-            "point": 2.75,
-            "over": 3.7,
-            "under": 1.24,
-            "lay_over": 5.01,
-            "lay_under": 1.37
-          },
-          {
-            "point": 5.0,
-            "over": 49.24,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 1.03
-          },
-          {
-            "point": 1.0,
-            "over": 1.21,
-            "under": 4.05,
-            "lay_over": 1.33,
-            "lay_under": 5.62
-          },
-          {
-            "point": 1.5,
-            "over": 1.64,
-            "under": 2.5,
-            "lay_over": 1.67,
-            "lay_under": 2.55
-          },
-          {
-            "point": 5.5,
-            "over": 51.0,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 1.02
-          },
-          {
-            "point": 4.25,
-            "over": 16.82,
-            "under": 1.05,
-            "lay_over": 25.11,
-            "lay_under": 1.07
-          },
-          {
-            "point": 4.75,
-            "over": 25.75,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 1.04
-          },
-          {
-            "point": 1.75,
-            "over": 1.83,
-            "under": 1.81,
-            "lay_over": 2.23,
-            "lay_under": 2.2
-          },
-          {
-            "point": 3.5,
-            "over": 6.6,
-            "under": 1.13,
-            "lay_over": 8.7,
-            "lay_under": 1.18
-          },
-          {
-            "point": 3.25,
-            "over": 5.98,
-            "under": 1.14,
-            "lay_over": 8.08,
-            "lay_under": 1.21
-          },
-          {
-            "point": 4.5,
-            "over": 17.66,
-            "under": 1.05,
-            "lay_over": 26.0,
-            "lay_under": 1.06
-          },
-          {
-            "point": 5.25,
-            "over": 50.12,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 1.03
-          },
-          {
-            "point": 0.5,
-            "over": 1.15,
-            "under": 6.0,
-            "lay_over": 1.2,
-            "lay_under": 7.6
-          },
-          {
-            "point": 3.0,
-            "over": 5.37,
-            "under": 1.15,
-            "lay_over": 7.47,
-            "lay_under": 1.23
-          },
-          {
             "point": 2.5,
             "over": 2.96,
             "under": 1.41,
             "lay_over": 3.44,
             "lay_under": 1.51
-          },
-          {
-            "point": 2.0,
-            "over": 2.19,
-            "under": 1.59,
-            "lay_over": 2.7,
-            "lay_under": 1.84
-          },
-          {
-            "point": 3.75,
-            "over": 9.25,
-            "under": 1.08,
-            "lay_over": 13.26,
-            "lay_under": 1.13
-          },
-          {
-            "point": 6.0,
-            "over": 157.86,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.06
-          },
-          {
-            "point": 1.25,
-            "over": 1.43,
-            "under": 3.01,
-            "lay_over": 1.5,
-            "lay_under": 3.33
-          },
-          {
-            "point": 5.75,
-            "over": 76.82,
-            "under": 1.01,
-            "lay_over": 990.0,
-            "lay_under": 1.06
-          },
-          {
-            "point": 6.5,
-            "over": 160.0,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.06
-          },
-          {
-            "point": 0.75,
-            "over": 1.17,
-            "under": 4.57,
-            "lay_over": 1.28,
-            "lay_under": 6.61
           }
         ],
         "ah_analysis": {},
         "edge_summary": [
-          {
-            "market": "Over 1.5 (1xBet vs Betfair)",
-            "edge": -2.4,
-            "status": "\u26aa",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 1.6,
-            "betfair_price": 1.64,
-            "type": "xbet_vs_betfair"
-          },
-          {
-            "market": "Under 1.5 (1xBet vs Betfair)",
-            "edge": -14.0,
-            "status": "\u274c",
-            "quarter_kelly_stake": 0,
-            "xbet_price": 2.15,
-            "betfair_price": 2.5,
-            "type": "xbet_vs_betfair"
-          },
           {
             "market": "Over 2.5 (1xBet vs Betfair)",
             "edge": -6.1,
@@ -1659,9 +431,9 @@
           "away": 0,
           "vig": 0,
           "source": "Betfair Exchange",
-          "over_odds": 1.15,
-          "under_odds": 1.04,
-          "ou_point": 5.75
+          "over_odds": 1.03,
+          "under_odds": 1.26,
+          "ou_point": 2.5
         },
         "betfair_midpoint": {
           "home": 50.535,
@@ -1679,214 +451,11 @@
         "xbet_totals": [],
         "betfair_totals": [
           {
-            "point": 5.75,
-            "over": 1.15,
-            "under": 1.04,
-            "lay_over": 990.0,
-            "lay_under": 7.27
-          },
-          {
-            "point": 5.5,
-            "over": 1.16,
-            "under": 1.05,
-            "lay_over": 101.0,
-            "lay_under": 7.25
-          },
-          {
-            "point": 7.75,
-            "over": 1.14,
-            "under": 1.02,
-            "lay_over": 0.0,
-            "lay_under": 1.37
-          },
-          {
-            "point": 0.5,
-            "over": 1.02,
-            "under": 1.26,
-            "lay_over": 4.85,
-            "lay_under": 990.0
-          },
-          {
-            "point": 1.0,
-            "over": 1.02,
-            "under": 1.26,
-            "lay_over": 4.85,
-            "lay_under": 990.0
-          },
-          {
-            "point": 1.25,
-            "over": 1.02,
-            "under": 1.26,
-            "lay_over": 4.85,
-            "lay_under": 990.0
-          },
-          {
-            "point": 6.75,
-            "over": 1.2,
-            "under": 1.12,
-            "lay_over": 0.0,
-            "lay_under": 11.24
-          },
-          {
-            "point": 4.5,
-            "over": 1.11,
-            "under": 1.06,
-            "lay_over": 26.0,
-            "lay_under": 11.0
-          },
-          {
             "point": 2.5,
             "over": 1.03,
             "under": 1.26,
             "lay_over": 5.0,
-            "lay_under": 100.0
-          },
-          {
-            "point": 3.75,
-            "over": 1.06,
-            "under": 1.06,
-            "lay_over": 26.0,
-            "lay_under": 48.98
-          },
-          {
-            "point": 5.0,
-            "over": 1.11,
-            "under": 1.05,
-            "lay_over": 101.0,
-            "lay_under": 10.49
-          },
-          {
-            "point": 2.25,
-            "over": 1.02,
-            "under": 1.26,
-            "lay_over": 5.0,
-            "lay_under": 100.5
-          },
-          {
-            "point": 6.0,
-            "over": 1.16,
-            "under": 1.05,
-            "lay_over": 21.0,
-            "lay_under": 7.0
-          },
-          {
-            "point": 4.25,
-            "over": 1.08,
-            "under": 1.06,
-            "lay_over": 26.0,
-            "lay_under": 14.13
-          },
-          {
-            "point": 6.5,
-            "over": 1.21,
-            "under": 1.05,
-            "lay_over": 101.0,
-            "lay_under": 5.77
-          },
-          {
-            "point": 3.5,
-            "over": 1.06,
-            "under": 1.13,
-            "lay_over": 9.34,
-            "lay_under": 100.0
-          },
-          {
-            "point": 7.0,
-            "over": 1.26,
-            "under": 1.01,
-            "lay_over": 990.0,
-            "lay_under": 4.78
-          },
-          {
-            "point": 3.25,
-            "over": 1.05,
-            "under": 1.13,
-            "lay_over": 9.34,
-            "lay_under": 100.0
-          },
-          {
-            "point": 3.0,
-            "over": 1.03,
-            "under": 1.13,
-            "lay_over": 9.34,
-            "lay_under": 95.34
-          },
-          {
-            "point": 2.0,
-            "over": 1.02,
-            "under": 1.26,
-            "lay_over": 5.0,
-            "lay_under": 952.48
-          },
-          {
-            "point": 0.75,
-            "over": 1.02,
-            "under": 1.25,
-            "lay_over": 4.85,
-            "lay_under": 990.0
-          },
-          {
-            "point": 1.75,
-            "over": 1.05,
-            "under": 1.01,
-            "lay_over": 101.0,
-            "lay_under": 990.0
-          },
-          {
-            "point": 2.75,
-            "over": 1.03,
-            "under": 1.12,
-            "lay_over": 9.34,
-            "lay_under": 97.67
-          },
-          {
-            "point": 1.5,
-            "over": 1.02,
-            "under": 1.26,
-            "lay_over": 4.85,
-            "lay_under": 980.0
-          },
-          {
-            "point": 4.0,
-            "over": 1.06,
-            "under": 1.06,
-            "lay_over": 26.0,
-            "lay_under": 46.95
-          },
-          {
-            "point": 6.25,
-            "over": 1.19,
-            "under": 1.05,
-            "lay_over": 101.0,
-            "lay_under": 6.2
-          },
-          {
-            "point": 7.5,
-            "over": 1.21,
-            "under": 1.1,
-            "lay_over": 10.41,
-            "lay_under": 5.77
-          },
-          {
-            "point": 5.25,
-            "over": 1.17,
-            "under": 1.05,
-            "lay_over": 101.0,
-            "lay_under": 6.7
-          },
-          {
-            "point": 7.25,
-            "over": 1.69,
-            "under": 1.04,
-            "lay_over": 24.34,
-            "lay_under": 2.45
-          },
-          {
-            "point": 4.75,
-            "over": 1.11,
-            "under": 1.05,
-            "lay_over": 101.27,
-            "lay_under": 10.75
+            "lay_under": 95.0
           }
         ],
         "ah_analysis": {},
@@ -1923,9 +492,9 @@
           "away": 0,
           "vig": 0,
           "source": "Betfair Exchange",
-          "over_odds": 12.59,
-          "under_odds": 1.06,
-          "ou_point": 5.0
+          "over_odds": 1.71,
+          "under_odds": 1.89,
+          "ou_point": 2.5
         },
         "betfair_midpoint": {
           "home": 0.0,
@@ -1942,146 +511,6 @@
         "xbet_odds": null,
         "xbet_totals": [],
         "betfair_totals": [
-          {
-            "point": 5.0,
-            "over": 12.59,
-            "under": 1.06,
-            "lay_over": 18.29,
-            "lay_under": 1.09
-          },
-          {
-            "point": 4.25,
-            "over": 4.87,
-            "under": 1.15,
-            "lay_over": 7.53,
-            "lay_under": 1.26
-          },
-          {
-            "point": 1.5,
-            "over": 1.24,
-            "under": 3.59,
-            "lay_over": 1.39,
-            "lay_under": 5.05
-          },
-          {
-            "point": 3.0,
-            "over": 2.26,
-            "under": 1.55,
-            "lay_over": 2.66,
-            "lay_under": 1.88
-          },
-          {
-            "point": 1.0,
-            "over": 1.06,
-            "under": 10.59,
-            "lay_over": 1.11,
-            "lay_under": 15.64
-          },
-          {
-            "point": 5.25,
-            "over": 13.15,
-            "under": 1.06,
-            "lay_over": 19.19,
-            "lay_under": 1.09
-          },
-          {
-            "point": 2.75,
-            "over": 1.97,
-            "under": 1.7,
-            "lay_over": 2.22,
-            "lay_under": 2.1
-          },
-          {
-            "point": 0.75,
-            "over": 1.06,
-            "under": 10.68,
-            "lay_over": 1.1,
-            "lay_under": 17.34
-          },
-          {
-            "point": 0.5,
-            "over": 1.05,
-            "under": 11.69,
-            "lay_over": 1.09,
-            "lay_under": 19.04
-          },
-          {
-            "point": 1.75,
-            "over": 1.29,
-            "under": 3.19,
-            "lay_over": 1.46,
-            "lay_under": 4.41
-          },
-          {
-            "point": 3.5,
-            "over": 2.96,
-            "under": 1.35,
-            "lay_over": 3.86,
-            "lay_under": 1.51
-          },
-          {
-            "point": 3.75,
-            "over": 3.49,
-            "under": 1.26,
-            "lay_over": 4.84,
-            "lay_under": 1.41
-          },
-          {
-            "point": 3.25,
-            "over": 2.55,
-            "under": 1.45,
-            "lay_over": 3.39,
-            "lay_under": 1.71
-          },
-          {
-            "point": 4.75,
-            "over": 7.7,
-            "under": 1.11,
-            "lay_over": 11.18,
-            "lay_under": 1.15
-          },
-          {
-            "point": 2.0,
-            "over": 1.36,
-            "under": 3.09,
-            "lay_over": 1.56,
-            "lay_under": 3.77
-          },
-          {
-            "point": 4.5,
-            "over": 5.27,
-            "under": 1.13,
-            "lay_over": 8.21,
-            "lay_under": 1.24
-          },
-          {
-            "point": 1.25,
-            "over": 1.15,
-            "under": 5.08,
-            "lay_over": 1.25,
-            "lay_under": 7.35
-          },
-          {
-            "point": 2.25,
-            "over": 1.54,
-            "under": 2.19,
-            "lay_over": 1.73,
-            "lay_under": 3.02
-          },
-          {
-            "point": 5.5,
-            "over": 13.71,
-            "under": 1.05,
-            "lay_over": 20.1,
-            "lay_under": 1.08
-          },
-          {
-            "point": 4.0,
-            "over": 4.46,
-            "under": 1.17,
-            "lay_over": 6.85,
-            "lay_under": 1.29
-          },
           {
             "point": 2.5,
             "over": 1.71,
@@ -2124,9 +553,9 @@
           "away": 0,
           "vig": 0,
           "source": "Betfair Exchange",
-          "over_odds": 14.57,
-          "under_odds": 1.05,
-          "ou_point": 5.0
+          "over_odds": 1.9,
+          "under_odds": 1.92,
+          "ou_point": 2.5
         },
         "betfair_midpoint": {
           "home": 1.665,
@@ -2144,207 +573,11 @@
         "xbet_totals": [],
         "betfair_totals": [
           {
-            "point": 5.0,
-            "over": 14.57,
-            "under": 1.05,
-            "lay_over": 18.62,
-            "lay_under": 1.08
-          },
-          {
-            "point": 3.5,
-            "over": 3.25,
-            "under": 1.36,
-            "lay_over": 3.75,
-            "lay_under": 1.45
-          },
-          {
-            "point": 0.75,
-            "over": 1.07,
-            "under": 11.04,
-            "lay_over": 1.1,
-            "lay_under": 15.0
-          },
-          {
             "point": 2.5,
             "over": 1.9,
             "under": 1.92,
             "lay_over": 2.08,
             "lay_under": 2.12
-          },
-          {
-            "point": 4.75,
-            "over": 8.92,
-            "under": 1.09,
-            "lay_over": 11.72,
-            "lay_under": 1.13
-          },
-          {
-            "point": 3.25,
-            "over": 2.89,
-            "under": 1.42,
-            "lay_over": 3.35,
-            "lay_under": 1.53
-          },
-          {
-            "point": 5.75,
-            "over": 22.42,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.05
-          },
-          {
-            "point": 2.75,
-            "over": 2.13,
-            "under": 1.72,
-            "lay_over": 2.39,
-            "lay_under": 1.89
-          },
-          {
-            "point": 3.0,
-            "over": 2.53,
-            "under": 1.51,
-            "lay_over": 2.95,
-            "lay_under": 1.65
-          },
-          {
-            "point": 6.75,
-            "over": 58.2,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.09
-          },
-          {
-            "point": 3.75,
-            "over": 4.01,
-            "under": 1.24,
-            "lay_over": 5.12,
-            "lay_under": 1.34
-          },
-          {
-            "point": 2.25,
-            "over": 1.67,
-            "under": 2.21,
-            "lay_over": 1.82,
-            "lay_under": 2.5
-          },
-          {
-            "point": 5.5,
-            "over": 16.0,
-            "under": 1.05,
-            "lay_over": 20.55,
-            "lay_under": 1.07
-          },
-          {
-            "point": 1.5,
-            "over": 1.29,
-            "under": 3.7,
-            "lay_over": 1.38,
-            "lay_under": 4.4
-          },
-          {
-            "point": 4.0,
-            "over": 5.56,
-            "under": 1.16,
-            "lay_over": 7.16,
-            "lay_under": 1.22
-          },
-          {
-            "point": 6.25,
-            "over": 39.25,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.03
-          },
-          {
-            "point": 1.0,
-            "over": 1.08,
-            "under": 9.96,
-            "lay_over": 1.12,
-            "lay_under": 13.5
-          },
-          {
-            "point": 1.75,
-            "over": 1.35,
-            "under": 3.22,
-            "lay_over": 1.45,
-            "lay_under": 3.81
-          },
-          {
-            "point": 7.0,
-            "over": 108.25,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.09
-          },
-          {
-            "point": 0.5,
-            "over": 1.06,
-            "under": 13.0,
-            "lay_over": 1.07,
-            "lay_under": 16.5
-          },
-          {
-            "point": 5.25,
-            "over": 15.28,
-            "under": 1.05,
-            "lay_over": 19.49,
-            "lay_under": 1.07
-          },
-          {
-            "point": 4.5,
-            "over": 6.6,
-            "under": 1.14,
-            "lay_over": 8.15,
-            "lay_under": 1.18
-          },
-          {
-            "point": 7.5,
-            "over": 110.0,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.09
-          },
-          {
-            "point": 6.0,
-            "over": 38.5,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.03
-          },
-          {
-            "point": 4.25,
-            "over": 6.08,
-            "under": 1.15,
-            "lay_over": 7.65,
-            "lay_under": 1.2
-          },
-          {
-            "point": 2.0,
-            "over": 1.44,
-            "under": 2.78,
-            "lay_over": 1.56,
-            "lay_under": 3.28
-          },
-          {
-            "point": 1.25,
-            "over": 1.18,
-            "under": 5.14,
-            "lay_over": 1.25,
-            "lay_under": 6.35
-          },
-          {
-            "point": 7.25,
-            "over": 109.12,
-            "under": 1.01,
-            "lay_over": 0.0,
-            "lay_under": 1.09
-          },
-          {
-            "point": 6.5,
-            "over": 40.0,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.03
           }
         ],
         "ah_analysis": {},
@@ -2381,9 +614,9 @@
           "away": 0,
           "vig": 0,
           "source": "Betfair Exchange",
-          "over_odds": 15.65,
-          "under_odds": 1.02,
-          "ou_point": 7.5
+          "over_odds": 1.94,
+          "under_odds": 1.9,
+          "ou_point": 2.5
         },
         "betfair_midpoint": {
           "home": 3.8249999999999997,
@@ -2401,207 +634,11 @@
         "xbet_totals": [],
         "betfair_totals": [
           {
-            "point": 7.5,
-            "over": 15.65,
-            "under": 1.02,
-            "lay_over": 0.0,
-            "lay_under": 1.07
-          },
-          {
-            "point": 5.25,
-            "over": 15.06,
-            "under": 1.05,
-            "lay_over": 24.19,
-            "lay_under": 1.08
-          },
-          {
-            "point": 4.5,
-            "over": 7.2,
-            "under": 1.13,
-            "lay_over": 8.7,
-            "lay_under": 1.17
-          },
-          {
-            "point": 3.75,
-            "over": 4.33,
-            "under": 1.21,
-            "lay_over": 5.63,
-            "lay_under": 1.3
-          },
-          {
-            "point": 5.0,
-            "over": 14.47,
-            "under": 1.05,
-            "lay_over": 23.2,
-            "lay_under": 1.08
-          },
-          {
-            "point": 0.5,
-            "over": 1.07,
-            "under": 12.0,
-            "lay_over": 1.1,
-            "lay_under": 15.29
-          },
-          {
-            "point": 2.75,
-            "over": 2.21,
-            "under": 1.7,
-            "lay_over": 2.43,
-            "lay_under": 1.83
-          },
-          {
-            "point": 1.75,
-            "over": 1.38,
-            "under": 3.17,
-            "lay_over": 1.46,
-            "lay_under": 3.58
-          },
-          {
-            "point": 3.25,
-            "over": 3.06,
-            "under": 1.41,
-            "lay_over": 3.41,
-            "lay_under": 1.49
-          },
-          {
-            "point": 1.25,
-            "over": 1.2,
-            "under": 4.89,
-            "lay_over": 1.26,
-            "lay_under": 5.88
-          },
-          {
-            "point": 6.75,
-            "over": 15.65,
-            "under": 1.02,
-            "lay_over": 0.0,
-            "lay_under": 1.07
-          },
-          {
-            "point": 1.0,
-            "over": 1.08,
-            "under": 8.74,
-            "lay_over": 1.13,
-            "lay_under": 12.55
-          },
-          {
-            "point": 6.5,
-            "over": 15.65,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.07
-          },
-          {
-            "point": 6.0,
-            "over": 15.65,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.07
-          },
-          {
-            "point": 5.5,
-            "over": 15.65,
-            "under": 1.05,
-            "lay_over": 25.18,
-            "lay_under": 1.07
-          },
-          {
-            "point": 3.0,
-            "over": 2.7,
-            "under": 1.5,
-            "lay_over": 2.98,
-            "lay_under": 1.59
-          },
-          {
-            "point": 2.25,
-            "over": 1.71,
-            "under": 2.19,
-            "lay_over": 1.84,
-            "lay_under": 2.4
-          },
-          {
-            "point": 1.5,
-            "over": 1.32,
-            "under": 3.6,
-            "lay_over": 1.39,
-            "lay_under": 4.09
-          },
-          {
-            "point": 4.75,
-            "over": 9.49,
-            "under": 1.07,
-            "lay_over": 13.61,
-            "lay_under": 1.12
-          },
-          {
-            "point": 0.75,
-            "over": 1.07,
-            "under": 9.56,
-            "lay_over": 1.12,
-            "lay_under": 13.92
-          },
-          {
-            "point": 2.0,
-            "over": 1.48,
-            "under": 2.77,
-            "lay_over": 1.57,
-            "lay_under": 3.06
-          },
-          {
-            "point": 3.5,
-            "over": 3.4,
-            "under": 1.35,
-            "lay_over": 3.85,
-            "lay_under": 1.42
-          },
-          {
-            "point": 4.25,
-            "over": 6.66,
-            "under": 1.13,
-            "lay_over": 8.24,
-            "lay_under": 1.18
-          },
-          {
-            "point": 5.75,
-            "over": 15.65,
-            "under": 1.02,
-            "lay_over": 990.0,
-            "lay_under": 1.07
-          },
-          {
-            "point": 4.0,
-            "over": 6.12,
-            "under": 1.14,
-            "lay_over": 7.77,
-            "lay_under": 1.2
-          },
-          {
             "point": 2.5,
             "over": 1.94,
             "under": 1.9,
             "lay_over": 2.12,
             "lay_under": 2.06
-          },
-          {
-            "point": 7.0,
-            "over": 15.65,
-            "under": 1.02,
-            "lay_over": 0.0,
-            "lay_under": 1.07
-          },
-          {
-            "point": 6.25,
-            "over": 15.65,
-            "under": 1.02,
-            "lay_over": 101.0,
-            "lay_under": 1.07
-          },
-          {
-            "point": 7.25,
-            "over": 15.65,
-            "under": 1.02,
-            "lay_over": 0.0,
-            "lay_under": 1.07
           }
         ],
         "ah_analysis": {},

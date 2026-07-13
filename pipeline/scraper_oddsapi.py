@@ -367,7 +367,7 @@ def extract_1xbet_odds(odds_data):
 
 
 def extract_totals(odds_data, bookmaker="Betfair Exchange"):
-    """Extract ALL Over/Under lines from a bookmaker. Returns list of {point, over, under}."""
+    """Extract Over/Under 2.5 odds only from a bookmaker."""
     bms = odds_data.get("bookmakers", {})
     bm = bms.get(bookmaker, [])
     if not bm:
@@ -376,18 +376,20 @@ def extract_totals(odds_data, bookmaker="Betfair Exchange"):
     for m in bm:
         if m.get("name") == "Totals":
             odds_list = m.get("odds", [])
+            # Only return the 2.5 line
             lines = []
             for o in odds_list:
                 point = float(o.get("hdp", 0))
-                if point <= 0:
+                if abs(point - 2.5) > 0.01:
                     continue
                 lines.append({
-                    "point": round(point, 2),
+                    "point": 2.5,
                     "over": float(o.get("over", 0)),
                     "under": float(o.get("under", 0)),
                     "lay_over": float(o.get("layOver", 0)),
                     "lay_under": float(o.get("layUnder", 0)),
                 })
+                break  # Only one 2.5 line
             return lines
     return []
 
