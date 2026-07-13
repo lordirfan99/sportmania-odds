@@ -1,6 +1,6 @@
 {
   "system_status": {
-    "last_updated": "2026-07-13T02:34:17Z",
+    "last_updated": "2026-07-13T02:40:05Z",
     "bankroll_rm": 34.2,
     "total_profit_rm": 0,
     "total_bets": 0,
@@ -102,13 +102,13 @@
         },
         "betfair_midpoint": {
           "home": 1.2650000000000001,
-          "draw": 7.4,
-          "away": 14.5,
+          "draw": 7.300000000000001,
+          "away": 14.25,
           "home_back": 1.26,
           "home_lay": 1.27,
           "draw_back": 7.2,
-          "draw_lay": 7.6,
-          "away_back": 14.0,
+          "draw_lay": 7.4,
+          "away_back": 13.5,
           "away_lay": 15.0,
           "source": "Betfair Exchange"
         },
@@ -167,11 +167,11 @@
           },
           {
             "market": "Halmstads BK +0.5 (AH) (1xBet vs Betfair)",
-            "edge": -27.4,
+            "edge": -26.3,
             "status": "\u274c",
             "quarter_kelly_stake": 0,
             "xbet_price": 3.557,
-            "betfair_price": 4.8995,
+            "betfair_price": 4.8271,
             "type": "xbet_vs_betfair"
           }
         ],
@@ -483,7 +483,7 @@
       ],
       "highest_edge_status": "\u26aa",
       "home_odds": 0.0,
-      "draw_odds": 3.9749999999999996,
+      "draw_odds": 3.925,
       "away_odds": 1.9100000000000001,
       "analysis": {
         "sport_raw": {
@@ -498,11 +498,11 @@
         },
         "betfair_midpoint": {
           "home": 0.0,
-          "draw": 3.9749999999999996,
+          "draw": 3.925,
           "away": 1.9100000000000001,
           "home_back": 0.0,
           "home_lay": 0.0,
-          "draw_back": 3.65,
+          "draw_back": 3.55,
           "draw_lay": 4.3,
           "away_back": 1.83,
           "away_lay": 1.99,
@@ -554,7 +554,7 @@
           "vig": 0,
           "source": "Betfair Exchange",
           "over_odds": 1.9,
-          "under_odds": 1.92,
+          "under_odds": 1.89,
           "ou_point": 2.5
         },
         "betfair_midpoint": {
@@ -575,8 +575,8 @@
           {
             "point": 2.5,
             "over": 1.9,
-            "under": 1.92,
-            "lay_over": 2.08,
+            "under": 1.89,
+            "lay_over": 2.12,
             "lay_under": 2.12
           }
         ],
