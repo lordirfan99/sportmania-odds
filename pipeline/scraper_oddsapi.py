@@ -496,6 +496,14 @@ def compute_ah_odds(xb, bf):
     return ah
 
 
+def qkelly(edge_pct, odds):
+    """Quarter Kelly as % of bankroll: (edge_decimal / (odds-1)) / 4 * 100."""
+    if edge_pct <= 3 or odds <= 1:
+        return 0
+    k = (edge_pct / 100) / (odds - 1) / 4 * 100
+    return round(max(0, k), 2)
+
+
 def compute_edges(matches):
     """Compute 1xBet vs Betfair Exchange edges for each match.
 
@@ -531,7 +539,7 @@ def compute_edges(matches):
                         "market": f"Over {pt} (1xBet vs Betfair)",
                         "edge": round(ev, 1),
                         "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                        "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                        "quarter_kelly_stake": qkelly(ev, x_over),
                         "xbet_price": x_over,
                         "betfair_price": b_over,
                         "type": "xbet_vs_betfair",
@@ -543,7 +551,7 @@ def compute_edges(matches):
                         "market": f"Under {pt} (1xBet vs Betfair)",
                         "edge": round(ev, 1),
                         "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                        "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                        "quarter_kelly_stake": qkelly(ev, x_under),
                         "xbet_price": x_under,
                         "betfair_price": b_under,
                         "type": "xbet_vs_betfair",
@@ -563,7 +571,7 @@ def compute_edges(matches):
                     "market": f"{m['home_team']} -0.5 (AH) (1xBet vs Betfair)",
                     "edge": round(ev, 1),
                     "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                    "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                    "quarter_kelly_stake": qkelly(ev, x_h),
                     "xbet_price": x_h,
                     "betfair_price": b_h,
                     "type": "xbet_vs_betfair",
@@ -578,7 +586,7 @@ def compute_edges(matches):
                     "market": f"{m['away_team']} +0.5 (AH) (1xBet vs Betfair)",
                     "edge": round(ev, 1),
                     "status": "🚀" if ev > 20 else ("✅" if ev > 5 else ("⚪" if ev > -5 else "❌")),
-                    "quarter_kelly_stake": round(max(0, ev / 25) * 2.5, 2) if ev > 3 else 0,
+                    "quarter_kelly_stake": qkelly(ev, x_a),
                     "xbet_price": x_a,
                     "betfair_price": b_a,
                     "type": "xbet_vs_betfair",
